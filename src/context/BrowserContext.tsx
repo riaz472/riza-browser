@@ -70,24 +70,28 @@ export function BrowserProvider({ children }: { children: React.ReactNode }) {
     let targetUrl = url.trim();
     if (!targetUrl) return;
 
-    // Handle home internal route
     if (targetUrl === 'rizabrowser://home') {
       setView('home');
       return;
     }
 
-    // Protocol check
-    if (!targetUrl.startsWith('http://') && !targetUrl.startsWith('https://') && !targetUrl.includes('://')) {
-      if (targetUrl.includes('.') && !targetUrl.includes(' ')) {
+    // Determine if it's a search or a URL
+    const isSearch = !targetUrl.includes('.') || targetUrl.includes(' ');
+    
+    if (isSearch) {
+      // Use DuckDuckGo HTML Mirror for unblocked searches
+      targetUrl = `https://duckduckgo.com/html/?q=${encodeURIComponent(targetUrl)}`;
+      setActiveUrl(url);
+      setProxiedUrl(targetUrl);
+    } else {
+      if (!targetUrl.startsWith('http://') && !targetUrl.startsWith('https://')) {
         targetUrl = `https://${targetUrl}`;
-      } else {
-        targetUrl = `https://www.google.com/search?q=${encodeURIComponent(targetUrl)}`;
       }
+      setActiveUrl(targetUrl);
+      // Use AllOrigins Public CORS Gateway for generic URLs
+      setProxiedUrl(`https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`);
     }
 
-    setActiveUrl(targetUrl);
-    // Route through the local proxy to bypass CORS/X-Frame-Options
-    setProxiedUrl(`/api/proxy?url=${encodeURIComponent(targetUrl)}`);
     setHistory(prev => [targetUrl, ...prev].slice(0, 50));
     setCurrentView('browser');
   };

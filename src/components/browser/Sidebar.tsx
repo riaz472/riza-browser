@@ -7,13 +7,16 @@ import { useBrowser } from '@/context/BrowserContext';
 import { cn } from '@/lib/utils';
 
 const RizaLogo = () => (
-  <svg viewBox="0 0 100 100" className="w-7 h-7" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <svg viewBox="0 0 100 100" className="w-8 h-8" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="15" y="15" width="70" height="70" rx="12" className="fill-current opacity-10" />
     <path 
-      d="M25 15V85M25 15H60C75 15 85 25 85 40C85 55 75 65 60 65H25M50 65L80 85" 
+      d="M35 25V75M35 25H55C65 25 72 32 72 42C72 52 65 59 55 59H35M52 59L72 75" 
       stroke="currentColor" 
-      strokeWidth="14" 
-      strokeLinecap="square"
+      strokeWidth="10" 
+      strokeLinecap="round"
+      strokeLinejoin="round"
     />
+    <circle cx="55" cy="42" r="4" fill="currentColor" className="animate-pulse" />
   </svg>
 );
 
@@ -33,20 +36,20 @@ export function Sidebar() {
       <div className="p-6">
         <div className="flex items-center gap-3 mb-8">
           <div className={cn(
-            "w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-700",
+            "w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-700",
             isStealthMode 
-              ? "shadow-[0_0_20px_rgba(255,51,51,0.4)] border border-cyber-crimson/50 text-cyber-crimson" 
-              : "shadow-[0_0_20px_rgba(51,139,255,0.4)] border border-cyber-blue/50 text-cyber-blue"
+              ? "shadow-[0_0_20px_rgba(255,51,51,0.4)] border border-cyber-crimson/50 text-cyber-crimson bg-cyber-crimson/5" 
+              : "shadow-[0_0_20px_rgba(51,139,255,0.4)] border border-cyber-blue/50 text-cyber-blue bg-cyber-blue/5"
           )}>
             <RizaLogo />
           </div>
           <div>
-            <h1 className="font-headline font-bold text-xl tracking-tight leading-none">rizabrowser</h1>
-            <p className="text-[10px] uppercase tracking-widest opacity-50 font-bold mt-1">Version 4.0.1</p>
+            <h1 className="font-headline font-bold text-xl tracking-tight leading-none">riza</h1>
+            <p className="text-[9px] uppercase tracking-[0.2em] opacity-40 font-bold mt-1">v4.0.1 Stable</p>
           </div>
         </div>
 
-        <nav className="space-y-1">
+        <nav className="space-y-1.5">
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = currentView === item.id;
@@ -55,20 +58,20 @@ export function Sidebar() {
                 key={item.id}
                 onClick={() => setView(item.id as any)}
                 className={cn(
-                  "w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all group relative overflow-hidden",
+                  "w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all group relative overflow-hidden",
                   isActive 
                     ? (isStealthMode ? "bg-cyber-crimson/10 text-cyber-crimson" : "bg-cyber-blue/10 text-cyber-blue") 
-                    : "text-foreground/60 hover:text-foreground hover:bg-white/5"
+                    : "text-foreground/50 hover:text-foreground hover:bg-white/5"
                 )}
               >
                 {isActive && (
                   <div className={cn(
-                    "absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 rounded-r-full",
+                    "absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-6 rounded-r-full shadow-[0_0_10px_currentColor]",
                     isStealthMode ? "bg-cyber-crimson" : "bg-cyber-blue"
                   )} />
                 )}
                 <Icon className={cn("w-5 h-5", isActive && "animate-pulse")} />
-                <span className="text-sm font-medium tracking-wide">{item.label}</span>
+                <span className="text-sm font-bold tracking-wide">{item.label}</span>
               </button>
             );
           })}
@@ -76,35 +79,28 @@ export function Sidebar() {
       </div>
 
       <div className="mt-auto p-6 space-y-4">
-        <div className="bg-white/5 rounded-2xl p-4 border border-white/5">
-          <div className="flex items-center justify-between mb-3">
+        <div className="bg-white/5 rounded-3xl p-5 border border-white/5 space-y-4">
+          <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-cyber-blue" />
-              <span className="text-xs font-bold uppercase tracking-wider opacity-60">System Health</span>
+              <div className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
+              <span className="text-[10px] font-black uppercase tracking-widest opacity-40">Grid Link</span>
             </div>
-            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+            <span className="text-[10px] font-bold text-cyber-blue uppercase">Stable</span>
           </div>
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-[10px] font-medium uppercase tracking-tighter">
-              <span>Encrypted Link</span>
-              <span className="text-cyber-blue">Active</span>
-            </div>
-            <div className="flex items-center justify-between text-[10px] font-medium uppercase tracking-tighter">
-              <span>Node Latency</span>
-              <span>12ms</span>
-            </div>
+          <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+            <div className="h-full bg-cyber-blue w-[85%] animate-pulse" />
           </div>
         </div>
 
         <div className="flex items-center gap-3 px-2">
           <div className="flex -space-x-2">
             {[1, 2, 3].map(i => (
-              <div key={i} className="w-6 h-6 rounded-full border-2 border-obsidian bg-muted flex items-center justify-center overflow-hidden">
-                <img src={`https://picsum.photos/seed/user${i}/32/32`} alt="user" />
+              <div key={i} className="w-7 h-7 rounded-full border-2 border-obsidian bg-muted flex items-center justify-center overflow-hidden">
+                <img src={`https://picsum.photos/seed/user${i}/32/32`} alt="user" className="w-full h-full object-cover" />
               </div>
             ))}
           </div>
-          <span className="text-[10px] font-bold opacity-40 uppercase">1.2k Active Nodes</span>
+          <span className="text-[10px] font-bold opacity-30 uppercase tracking-tighter">1.2k Nodes Online</span>
         </div>
       </div>
     </div>
