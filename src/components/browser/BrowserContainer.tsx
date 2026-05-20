@@ -6,6 +6,7 @@ import { useBrowser } from '@/context/BrowserContext';
 import { Sidebar } from './Sidebar';
 import { TopBar } from './TopBar';
 import { Dashboard } from './Dashboard';
+import { WebRenderer } from './WebRenderer';
 import { SourceCodeAnalyzer } from './SourceCodeAnalyzer';
 import { ScriptTerminal } from './ScriptTerminal';
 import { ExtensionStore } from './ExtensionStore';
@@ -18,6 +19,7 @@ export function BrowserContainer() {
   const renderView = () => {
     switch (currentView) {
       case 'home': return <Dashboard />;
+      case 'browser': return <WebRenderer />;
       case 'analyzer': return <SourceCodeAnalyzer />;
       case 'terminal': return <ScriptTerminal />;
       case 'extensions': return <ExtensionStore />;
@@ -36,13 +38,13 @@ export function BrowserContainer() {
         
         <TopBar />
         <main className="flex-1 relative overflow-hidden bg-background/40">
-          <div className="absolute inset-0 transition-opacity duration-700">
+          <div className="absolute inset-0 transition-all duration-500">
             {renderView()}
           </div>
         </main>
         
         {/* Footer Info */}
-        <footer className="h-10 px-6 glass-panel border-t border-white/5 flex items-center justify-between text-[10px] font-bold uppercase tracking-widest opacity-30">
+        <footer className="h-10 px-6 glass-panel border-t border-white/5 flex items-center justify-between text-[10px] font-bold uppercase tracking-widest opacity-30 shrink-0">
           <div className="flex gap-6">
             <span>RIZABROWSER OS</span>
             <span>NODE ID: RX-9902-B</span>

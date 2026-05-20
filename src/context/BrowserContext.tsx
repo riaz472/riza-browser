@@ -3,13 +3,16 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-type BrowserView = 'home' | 'analyzer' | 'terminal' | 'settings' | 'extensions';
+export type BrowserView = 'home' | 'browser' | 'analyzer' | 'terminal' | 'settings' | 'extensions';
 
 interface BrowserContextType {
   isStealthMode: boolean;
   toggleStealthMode: () => void;
   currentView: BrowserView;
   setView: (view: BrowserView) => void;
+  activeUrl: string;
+  navigate: (url: string) => void;
+  history: string[];
   blockedAds: number;
   blockedTrackers: number;
   engineProfile: string;
@@ -29,6 +32,8 @@ const BrowserContext = createContext<BrowserContextType | undefined>(undefined);
 export function BrowserProvider({ children }: { children: React.ReactNode }) {
   const [isStealthMode, setIsStealthMode] = useState(false);
   const [currentView, setCurrentView] = useState<BrowserView>('home');
+  const [activeUrl, setActiveUrl] = useState('');
+  const [history, setHistory] = useState<string[]>([]);
   const [blockedAds, setBlockedAds] = useState(0);
   const [blockedTrackers, setBlockedTrackers] = useState(0);
   const [engineProfile, setEngineProfile] = useState('Chrome 122 (macOS)');
@@ -39,7 +44,6 @@ export function BrowserProvider({ children }: { children: React.ReactNode }) {
     canvasMixing: true,
   });
 
-  // Simulated shield counters
   useEffect(() => {
     const interval = setInterval(() => {
       setBlockedAds(prev => prev + Math.floor(Math.random() * 2));
@@ -53,7 +57,6 @@ export function BrowserProvider({ children }: { children: React.ReactNode }) {
       const next = !prev;
       if (next) {
         document.documentElement.classList.add('stealth-mode');
-        // Simulate blocking persistence
         localStorage.clear();
         sessionStorage.clear();
       } else {
@@ -63,7 +66,27 @@ export function BrowserProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
-  const setView = (view: BrowserView) => setCurrentView(view);
+  const navigate = (url: string) => {
+    let targetUrl = url.trim();
+    if (!targetUrl) return;
+
+    if (!targetUrl.startsWith('http://') && !targetUrl.startsWith('https://') && !targetUrl.includes('://')) {
+      if (targetUrl.includes('.') && !targetUrl.includes(' ')) {
+        targetUrl = `https://${targetUrl}`;
+      } else {
+        targetUrl = `https://www.google.com/search?q=${encodeURIComponent(targetUrl)}`;
+      }
+    }
+
+    setActiveUrl(targetUrl);
+    setHistory(prev => [targetUrl, ...prev].slice(0, 50));
+    setCurrentView('browser');
+  };
+
+  const setView = (view: BrowserView) => {
+    setCurrentView(view);
+    if (view === 'home') setActiveUrl('');
+  };
 
   return (
     <BrowserContext.Provider
@@ -72,6 +95,9 @@ export function BrowserProvider({ children }: { children: React.ReactNode }) {
         toggleStealthMode,
         currentView,
         setView,
+        activeUrl,
+        navigate,
+        history,
         blockedAds,
         blockedTrackers,
         engineProfile,
