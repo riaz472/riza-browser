@@ -1,9 +1,9 @@
+
 import { NextRequest, NextResponse } from 'next/server';
 
 /**
- * Riza Proxy Engine v4.0 - Production Mirroring
- * Features: Absolute URL rewriting, Script injection for link interception,
- * User-Agent spoofing, and automatic search engine fallback.
+ * Riza Proxy Engine v5.0 - Shadow DOM Simulation Support
+ * Features: Deep attribute rewriting, Script defusal, and security header stripping.
  */
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -23,75 +23,38 @@ export async function GET(request: NextRequest) {
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
         'Accept-Language': 'en-US,en;q=0.9',
       },
-      next: { revalidate: 0 } // Bypass cache for live content
+      next: { revalidate: 0 }
     });
 
-    // 2. Strict Dynamic Fallback for blocked/failing nodes
-    if (!response.ok && response.status !== 404) {
-      const fallbackUrl = `https://duckduckgo.com/html/?q=${encodeURIComponent(targetUrl)}`;
-      return NextResponse.redirect(`${new URL(request.url).origin}/api/proxy?url=${encodeURIComponent(fallbackUrl)}`);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch: ${response.status}`);
     }
 
     const contentType = response.headers.get('content-type') || '';
-    const finalUrl = new URL(response.url); // Handle redirects
+    const finalUrl = new URL(response.url);
     
     if (contentType.includes('text/html')) {
       let html = await response.text();
       
-      // 3. Response Mirroring & Script Injection Module
-      // Injects absolute base tag and a communication bridge for the parent browser
-      const injection = `
-        <base href="${finalUrl.origin}${finalUrl.pathname}">
-        <script>
-          // Global error survival layer
-          window.onerror = function() { return true; };
-          
-          // Link Interception Bridge
-          document.addEventListener('click', function(e) {
-            let target = e.target.closest('a');
-            if(target && target.href) {
-              const href = target.getAttribute('href');
-              if (href && !href.startsWith('#') && !href.startsWith('javascript:')) {
-                e.preventDefault();
-                try {
-                  const absoluteUrl = new URL(href, window.location.href).href;
-                  window.parent.postMessage({ type: 'NAVIGATE', url: absoluteUrl }, '*');
-                } catch(err) {}
-              }
-            }
-          }, true);
+      // 2. Defusal Module: Strip frame-breaking and ancestry-checking scripts
+      html = html.replace(/<script\b[^>]*>([\s\S]*?)<\/script>/gim, (match) => {
+        if (match.toLowerCase().includes('top.location') || 
+            match.toLowerCase().includes('window.frameElement') ||
+            match.toLowerCase().includes('parent.location')) {
+          return '<!-- Riza Defused Security Script -->';
+        }
+        return match;
+      });
 
-          // Form Submission Interception (Search engines support)
-          document.addEventListener('submit', function(e) {
-            const form = e.target;
-            if (form.method.toLowerCase() === 'get') {
-              e.preventDefault();
-              const formData = new FormData(form);
-              const params = new URLSearchParams();
-              for (const [key, value] of formData.entries()) {
-                params.append(key, value.toString());
-              }
-              const action = form.getAttribute('action') || '';
-              try {
-                const absoluteUrl = new URL(action, window.location.href).href;
-                const finalUrl = absoluteUrl + (absoluteUrl.includes('?') ? '&' : '?') + params.toString();
-                window.parent.postMessage({ type: 'NAVIGATE', url: finalUrl }, '*');
-              } catch(err) {}
-            }
-          }, true);
-        </script>
-      `;
-      
-      // Inject at the beginning of head
-      html = html.replace('<head>', `<head>${injection}`);
-
-      // 4. Absolute URL Rewriting Module
+      // 3. Asset Rewriting Module: Convert all relative paths to absolute via proxy
       const proxyBase = `${new URL(request.url).origin}/api/proxy?url=`;
+      
       const rewriteAttribute = (content: string, attr: string) => {
         const regex = new RegExp(`${attr}=(['"])((?!#|data:|javascript:|mailto:|tel:)[^'"]+)\\1`, 'gi');
         return content.replace(regex, (match, quote, p1) => {
           try {
             const absoluteUrl = new URL(p1, finalUrl.href).href;
+            // Only proxy HTML/JS/CSS assets, direct images can sometimes be loaded directly
             return `${attr}=${quote}${proxyBase}${encodeURIComponent(absoluteUrl)}${quote}`;
           } catch (e) {
             return match;
@@ -103,12 +66,13 @@ export async function GET(request: NextRequest) {
       html = rewriteAttribute(html, 'src');
       html = rewriteAttribute(html, 'action');
 
-      // 5. Explicit Header Stripping & Content Spoofing
+      // 4. Inject Base Tag to catch remaining relative paths
+      html = html.replace('<head>', `<head><base href="${finalUrl.origin}${finalUrl.pathname}">`);
+
+      // 5. Explicit Header Stripping
       const headers = new Headers();
       headers.set('Content-Type', 'text/html; charset=utf-8');
       headers.set('Access-Control-Allow-Origin', '*');
-      headers.set('X-Frame-Options', 'ALLOWALL');
-      headers.set('Content-Security-Policy', "default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; frame-ancestors *;");
 
       return new NextResponse(html, {
         status: 200,
@@ -129,8 +93,6 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error: any) {
-    // Ultimate fallback to functional search engine mirror
-    const fallbackUrl = `https://duckduckgo.com/html/`;
-    return NextResponse.redirect(`${new URL(request.url).origin}/api/proxy?url=${encodeURIComponent(fallbackUrl)}`);
+    return new NextResponse(`Riza Proxy Error: ${error.message}`, { status: 500 });
   }
 }

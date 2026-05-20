@@ -3,37 +3,25 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useBrowser } from '@/context/BrowserContext';
-import { Globe, Lock, RefreshCw, ShieldAlert, Loader2 } from 'lucide-react';
+import { Globe, RefreshCw, Loader2, ShieldAlert } from 'lucide-react';
 
 export function WebRenderer() {
-  const { proxiedUrl, activeUrl, isStealthMode, navigate } = useBrowser();
+  const { activeUrl, proxiedUrl, isStealthMode, navigate } = useBrowser();
   const [isLoading, setIsLoading] = useState(false);
-  const [htmlContent, setHtmlContent] = useState<string>('');
-  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const shadowRootRef = useRef<ShadowRoot | null>(null);
 
   useEffect(() => {
-    const handleMessage = (event: MessageEvent) => {
-      if (event.data?.type === 'NAVIGATE' && event.data?.url) {
-        navigate(event.data.url);
-      }
-    };
-    window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
-  }, [navigate]);
+    if (!viewportRef.current) return;
+    
+    // Initialize Shadow Root if it doesn't exist
+    if (!shadowRootRef.current) {
+      shadowRootRef.current = viewportRef.current.attachShadow({ mode: 'open' });
+    }
+  }, []);
 
   useEffect(() => {
-    if (!proxiedUrl) {
-      setHtmlContent('');
-      setIsLoading(false);
-      return;
-    }
-
-    // Direct embed for DuckDuckGo which allows frame rendering natively
-    if (proxiedUrl.includes('duckduckgo.com/html/')) {
-      setHtmlContent('');
-      setIsLoading(false);
-      return;
-    }
+    if (!activeUrl || !proxiedUrl) return;
 
     let isMounted = true;
     const fetchContent = async () => {
@@ -42,47 +30,42 @@ export function WebRenderer() {
         const response = await fetch(proxiedUrl);
         if (!response.ok) throw new Error("Gateway Timeout");
         
-        let html = await response.text();
+        const html = await response.text();
         
-        // Inject absolute base tag and navigation bridge for links
-        const injection = `
-          <base href="${activeUrl}">
-          <script>
-            window.onerror = function() { return true; };
-            document.addEventListener('click', function(e) {
-              let target = e.target.closest('a');
-              if(target && target.href) {
-                const href = target.getAttribute('href');
-                if (href && !href.startsWith('#') && !href.startsWith('javascript:')) {
-                  e.preventDefault();
-                  try {
-                    const abs = new URL(href, window.location.href).href;
-                    window.parent.postMessage({ type: 'NAVIGATE', url: abs }, '*');
-                  } catch(err) {}
+        if (isMounted && shadowRootRef.current) {
+          // Inject the HTML into the Shadow DOM
+          shadowRootRef.current.innerHTML = html;
+          
+          // Intercept all link clicks inside the shadow DOM to keep navigation in-app
+          shadowRootRef.current.addEventListener('click', (e) => {
+            const target = (e.target as HTMLElement).closest('a');
+            if (target && target.href) {
+              const href = target.getAttribute('href');
+              if (href && !href.startsWith('#') && !href.startsWith('javascript:')) {
+                e.preventDefault();
+                try {
+                  const absoluteUrl = new URL(href, activeUrl).href;
+                  navigate(absoluteUrl);
+                } catch (err) {
+                  console.error("Navigation intercept failed", err);
                 }
               }
-            }, true);
-          </script>
-        `;
-        
-        html = html.replace('<head>', `<head>${injection}`);
+            }
+          }, true);
 
-        if (isMounted) {
-          setHtmlContent(html);
           setIsLoading(false);
         }
       } catch (err) {
+        console.error("Simulation Engine Failure:", err);
         if (isMounted) setIsLoading(false);
       }
     };
 
     fetchContent();
     return () => { isMounted = false; };
-  }, [proxiedUrl, activeUrl]);
+  }, [proxiedUrl, activeUrl, navigate]);
 
-  const handleRefresh = () => navigate(activeUrl);
-
-  if (!proxiedUrl) return (
+  if (!activeUrl) return (
     <div className="flex-1 h-full flex items-center justify-center bg-obsidian">
       <div className="text-center space-y-4 opacity-20">
         <Globe className="w-16 h-16 mx-auto animate-pulse" />
@@ -91,46 +74,40 @@ export function WebRenderer() {
     </div>
   );
 
-  const isSearchMirror = proxiedUrl.includes('duckduckgo.com/html/');
-
   return (
     <div className="flex-1 h-full flex flex-col bg-white overflow-hidden relative">
       {isLoading && (
         <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-obsidian/95 backdrop-blur-md">
           <Loader2 className={`w-12 h-12 ${isStealthMode ? 'text-cyber-crimson' : 'text-cyber-blue'} animate-spin`} />
-          <p className="mt-4 text-[10px] font-bold uppercase tracking-[0.3em] opacity-40">Syncing Node</p>
+          <p className="mt-4 text-[10px] font-bold uppercase tracking-[0.3em] opacity-40">Simulating DOM Node</p>
         </div>
       )}
 
       <div className="h-8 bg-muted/80 backdrop-blur-md border-b border-white/5 flex items-center px-4 justify-between text-[9px] font-bold uppercase tracking-widest text-foreground/30 shrink-0 z-10">
         <div className="flex items-center gap-4">
-          <span className="flex items-center gap-1.5 text-green-500/60">
-            <Lock className="w-3 h-3" />
-            SECURE RELAY
+          <span className="flex items-center gap-1.5 text-green-500/60 font-black">
+            <ShieldAlert className="w-3 h-3" />
+            NATIVE DOM SIMULATION ACTIVE
           </span>
-          <span>GATEWAY: {isSearchMirror ? 'DDG-DIRECT' : 'ALLORIGINS-CORS'}</span>
+          <span>NODE: LOCAL-SHADOW-V4</span>
         </div>
-        <button onClick={handleRefresh} className="hover:text-foreground transition-colors flex items-center gap-1">
+        <button onClick={() => navigate(activeUrl)} className="hover:text-foreground transition-colors flex items-center gap-1">
           <RefreshCw className="w-2.5 h-2.5" />
-          FORCE SYNC
+          FORCE RE-RENDER
         </button>
       </div>
 
-      <div className="flex-1 bg-white relative">
-        <iframe
-          ref={iframeRef}
-          src={isSearchMirror ? proxiedUrl : undefined}
-          srcDoc={!isSearchMirror ? htmlContent : undefined}
-          className="w-full h-full border-none bg-white"
-          sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
-        />
-      </div>
+      {/* Main Viewport Container */}
+      <div 
+        ref={viewportRef} 
+        className="flex-1 bg-white overflow-y-auto overflow-x-hidden selection:bg-primary/20"
+      />
 
       {isStealthMode && (
         <div className="absolute bottom-4 left-4 pointer-events-none z-30">
           <div className="glass-panel border-cyber-crimson/50 bg-cyber-crimson/10 rounded-xl p-3 flex items-center gap-3 shadow-[0_0_20px_rgba(255,51,51,0.1)]">
-            <ShieldAlert className="w-4 h-4 text-cyber-crimson" />
-            <div className="text-[9px] font-bold uppercase text-cyber-crimson">Stealth Routing Active</div>
+            <div className="w-2 h-2 rounded-full bg-cyber-crimson animate-pulse" />
+            <div className="text-[9px] font-bold uppercase text-cyber-crimson tracking-widest">Stealth Shadow Route Active</div>
           </div>
         </div>
       )}
