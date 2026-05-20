@@ -35,6 +35,10 @@ const nextConfig: NextConfig = {
     serverActions: {
       allowedOrigins: ['*']
     }
+  },
+  // Ensure the dev server handles the cloud proxy environment
+  devIndicators: {
+    appIsrStatus: false,
   }
 };
 
