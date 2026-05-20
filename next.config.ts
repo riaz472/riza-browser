@@ -30,15 +30,10 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  // Experimental config for handling cloud preview hosts
   experimental: {
     serverActions: {
       allowedOrigins: ['*']
     }
-  },
-  // Ensure the dev server handles the cloud proxy environment
-  devIndicators: {
-    appIsrStatus: false,
   }
 };
 
