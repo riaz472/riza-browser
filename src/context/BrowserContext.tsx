@@ -78,23 +78,25 @@ export function BrowserProvider({ children }: { children: React.ReactNode }) {
     // Determine if it's a search or a URL
     const isSearch = !targetUrl.includes('.') || targetUrl.includes(' ');
     
+    let finalProxiedUrl = '';
+    let finalActiveUrl = targetUrl;
+
     if (isSearch) {
-      // Use DuckDuckGo HTML Mirror for unblocked, frame-friendly searches
-      const searchUrl = `https://duckduckgo.com/html/?q=${encodeURIComponent(targetUrl)}`;
-      setActiveUrl(targetUrl);
-      setProxiedUrl(searchUrl);
+      // Route search to DuckDuckGo via CORS proxy
+      const ddgUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(targetUrl)}`;
+      finalProxiedUrl = `https://corsproxy.io/?url=${encodeURIComponent(ddgUrl)}`;
     } else {
       if (!targetUrl.startsWith('http://') && !targetUrl.startsWith('https://')) {
         targetUrl = `https://${targetUrl}`;
       }
-      setActiveUrl(targetUrl);
-      
-      // Use AllOrigins Public CORS Gateway for generic URLs as a srcDoc fetch
-      // This is the most reliable way to attempt external site loads
-      setProxiedUrl(`https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`);
+      finalActiveUrl = targetUrl;
+      // Use Public CORS Proxy for direct URL rendering
+      finalProxiedUrl = `https://corsproxy.io/?url=${encodeURIComponent(targetUrl)}`;
     }
 
-    setHistory(prev => [targetUrl, ...prev].slice(0, 50));
+    setActiveUrl(finalActiveUrl);
+    setProxiedUrl(finalProxiedUrl);
+    setHistory(prev => [finalActiveUrl, ...prev].slice(0, 50));
     setCurrentView('browser');
   };
 
