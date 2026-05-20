@@ -1,6 +1,12 @@
 {
   "placeholderImages": [
     {
+      "id": "riza-logo",
+      "description": "RizaBrowser Futuristic R Logo",
+      "imageUrl": "https://picsum.photos/seed/riza-logo/200/200",
+      "imageHint": "futuristic logo R"
+    },
+    {
       "id": "google-logo",
       "description": "Google Logo",
       "imageUrl": "https://picsum.photos/seed/google/100/100",

@@ -5,9 +5,11 @@ import React from 'react';
 import { LayoutDashboard, Code, ShieldCheck, Terminal, Settings, Puzzle, Cpu, Globe, Activity } from 'lucide-react';
 import { useBrowser } from '@/context/BrowserContext';
 import { cn } from '@/lib/utils';
+import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 export function Sidebar() {
   const { currentView, setView, isStealthMode } = useBrowser();
+  const logoImage = PlaceHolderImages.find(img => img.id === 'riza-logo') || PlaceHolderImages[0];
 
   const menuItems = [
     { id: 'home', label: 'Dashboard', icon: LayoutDashboard },
@@ -22,10 +24,15 @@ export function Sidebar() {
       <div className="p-6">
         <div className="flex items-center gap-3 mb-8">
           <div className={cn(
-            "w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-700",
-            isStealthMode ? "bg-cyber-crimson shadow-[0_0_20px_rgba(255,51,51,0.4)]" : "bg-cyber-blue shadow-[0_0_20px_rgba(51,139,255,0.4)]"
+            "w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-700 overflow-hidden",
+            isStealthMode ? "shadow-[0_0_20px_rgba(255,51,51,0.4)] border border-cyber-crimson/50" : "shadow-[0_0_20px_rgba(51,139,255,0.4)] border border-cyber-blue/50"
           )}>
-            <Cpu className="text-white w-6 h-6" />
+            <img 
+              src={logoImage.imageUrl} 
+              alt="Riza Logo" 
+              className="w-full h-full object-cover" 
+              data-ai-hint={logoImage.imageHint}
+            />
           </div>
           <div>
             <h1 className="font-headline font-bold text-xl tracking-tight leading-none">rizabrowser</h1>
