@@ -11,7 +11,6 @@ interface BrowserContextType {
   currentView: BrowserView;
   setView: (view: BrowserView) => void;
   activeUrl: string;
-  proxiedUrl: string;
   navigate: (url: string) => void;
   history: string[];
   blockedAds: number;
@@ -34,7 +33,6 @@ export function BrowserProvider({ children }: { children: React.ReactNode }) {
   const [isStealthMode, setIsStealthMode] = useState(false);
   const [currentView, setCurrentView] = useState<BrowserView>('home');
   const [activeUrl, setActiveUrl] = useState('');
-  const [proxiedUrl, setProxiedUrl] = useState('');
   const [history, setHistory] = useState<string[]>([]);
   const [blockedAds, setBlockedAds] = useState(0);
   const [blockedTrackers, setBlockedTrackers] = useState(0);
@@ -67,36 +65,17 @@ export function BrowserProvider({ children }: { children: React.ReactNode }) {
   };
 
   const navigate = (url: string) => {
-    let targetUrl = url.trim();
-    if (!targetUrl) return;
+    let target = url.trim();
+    if (!target) return;
 
-    if (targetUrl === 'rizabrowser://home') {
+    if (target === 'rizabrowser://home') {
       setView('home');
       return;
     }
 
-    // Determine if it's a search or a URL
-    const isSearch = !targetUrl.includes('.') || targetUrl.includes(' ');
-    
-    let finalProxiedUrl = '';
-    let finalActiveUrl = targetUrl;
-
-    if (isSearch) {
-      // Direct embedding for search (DuckDuckGo natively allows iframes)
-      finalActiveUrl = targetUrl;
-      finalProxiedUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(targetUrl)}`;
-    } else {
-      if (!targetUrl.startsWith('http://') && !targetUrl.startsWith('https://')) {
-        targetUrl = `https://${targetUrl}`;
-      }
-      finalActiveUrl = targetUrl;
-      // Use AllOrigins (Open Source / Free) for direct URLs
-      finalProxiedUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
-    }
-
-    setActiveUrl(finalActiveUrl);
-    setProxiedUrl(finalProxiedUrl);
-    setHistory(prev => [finalActiveUrl, ...prev].slice(0, 50));
+    // Treat everything as a query/URL for the Google Bypass Shell
+    setActiveUrl(target);
+    setHistory(prev => [target, ...prev].slice(0, 50));
     setCurrentView('browser');
   };
 
@@ -104,7 +83,6 @@ export function BrowserProvider({ children }: { children: React.ReactNode }) {
     setCurrentView(view);
     if (view === 'home') {
       setActiveUrl('');
-      setProxiedUrl('');
     }
   };
 
@@ -116,7 +94,6 @@ export function BrowserProvider({ children }: { children: React.ReactNode }) {
         currentView,
         setView,
         activeUrl,
-        proxiedUrl,
         navigate,
         history,
         blockedAds,

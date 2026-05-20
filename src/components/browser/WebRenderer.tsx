@@ -1,44 +1,19 @@
 
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useBrowser } from '@/context/BrowserContext';
-import { Globe, Loader2, ShieldAlert } from 'lucide-react';
+import { Globe, Loader2 } from 'lucide-react';
 
 export function WebRenderer() {
-  const { activeUrl, navigate, isStealthMode } = useBrowser();
+  const { activeUrl, isStealthMode } = useBrowser();
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const iframeRef = useRef<HTMLIFrameElement>(null);
-
-  // Setup proxy URL
-  const getProxiedUrl = (url: string) => {
-    if (!url) return '';
-    // Use DuckDuckGo mirror for search
-    if (!url.includes('.') || url.includes(' ')) {
-      return `https://html.duckduckgo.com/html/?q=${encodeURIComponent(url)}`;
-    }
-    // Use our local proxy for direct URLs
-    const target = url.startsWith('http') ? url : `https://${url}`;
-    return `/api/proxy?url=${encodeURIComponent(target)}`;
-  };
 
   useEffect(() => {
     if (activeUrl) {
       setIsLoading(true);
-      setError(null);
     }
   }, [activeUrl]);
-
-  useEffect(() => {
-    const handleMessage = (event: MessageEvent) => {
-      if (event.data?.type === 'NAVIGATE') {
-        navigate(event.data.url);
-      }
-    };
-    window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
-  }, [navigate]);
 
   if (!activeUrl) return (
     <div className="flex-1 h-full flex items-center justify-center bg-obsidian">
@@ -49,6 +24,9 @@ export function WebRenderer() {
     </div>
   );
 
+  // The Google igu=1 parameter allows embedding in frames without Refuse-to-connect
+  const shellUrl = `https://www.google.com/search?igu=1&q=${encodeURIComponent(activeUrl)}`;
+
   return (
     <div className="flex-1 h-full flex flex-col bg-white overflow-hidden relative">
       {isLoading && (
@@ -58,23 +36,10 @@ export function WebRenderer() {
         </div>
       )}
 
-      {error && (
-        <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-obsidian text-white p-8 text-center">
-          <ShieldAlert className="w-16 h-16 text-cyber-crimson mb-4" />
-          <h3 className="text-xl font-bold mb-2">Connection Blocked</h3>
-          <p className="text-sm opacity-50 max-w-md">{error}</p>
-        </div>
-      )}
-
       <iframe
-        ref={iframeRef}
-        src={getProxiedUrl(activeUrl)}
+        src={shellUrl}
         className="flex-1 w-full h-full border-none bg-white"
         onLoad={() => setIsLoading(false)}
-        onError={() => {
-          setIsLoading(false);
-          setError("The target node refused the shadow connection. Try a different URL.");
-        }}
         sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-downloads"
         title="browser-viewport"
       />

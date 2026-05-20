@@ -2,32 +2,39 @@
 "use client";
 
 import React from 'react';
-import { LayoutDashboard, Code, ShieldCheck, Terminal, Settings, Puzzle, Cpu, Globe, Activity } from 'lucide-react';
+import { LayoutDashboard, Code, ShieldCheck, Terminal, Settings, Puzzle } from 'lucide-react';
 import { useBrowser } from '@/context/BrowserContext';
 import { cn } from '@/lib/utils';
 
 const RizaLogo = () => (
   <svg viewBox="0 0 100 100" className="w-8 h-8" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path 
-      d="M20 20H55C70 20 80 30 80 45C80 60 70 70 55 70H20V80" 
+      d="M30 20C30 20 75 20 75 45C75 70 30 70 30 70" 
       stroke="currentColor" 
-      strokeWidth="12" 
-      strokeLinecap="round"
-      strokeLinejoin="round"
+      strokeWidth="10" 
+      strokeLinecap="round" 
+      strokeLinejoin="round" 
     />
     <path 
-      d="M20 45H50" 
+      d="M30 20V80" 
       stroke="currentColor" 
-      strokeWidth="12" 
-      strokeLinecap="round"
+      strokeWidth="10" 
+      strokeLinecap="round" 
+    />
+    <path 
+      d="M30 45H60" 
+      stroke="currentColor" 
+      strokeWidth="10" 
+      strokeLinecap="round" 
     />
     <path 
       d="M50 70L80 90" 
       stroke="currentColor" 
-      strokeWidth="12" 
-      strokeLinecap="round"
+      strokeWidth="10" 
+      strokeLinecap="round" 
+      strokeLinejoin="round" 
     />
-    <circle cx="50" cy="45" r="5" fill="currentColor" className="animate-pulse" />
+    <circle cx="52" cy="45" r="4" fill="currentColor" className="animate-pulse" />
   </svg>
 );
 
