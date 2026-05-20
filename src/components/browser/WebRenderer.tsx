@@ -28,7 +28,7 @@ export function WebRenderer() {
       return;
     }
 
-    // Direct embed for search mirrors
+    // Direct embed for DuckDuckGo which allows frame rendering natively
     if (proxiedUrl.includes('duckduckgo.com/html/')) {
       setHtmlContent('');
       setIsLoading(false);
@@ -44,7 +44,7 @@ export function WebRenderer() {
         
         let html = await response.text();
         
-        // Inject absolute base tag and navigation bridge
+        // Inject absolute base tag and navigation bridge for links
         const injection = `
           <base href="${activeUrl}">
           <script>

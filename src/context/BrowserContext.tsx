@@ -79,16 +79,18 @@ export function BrowserProvider({ children }: { children: React.ReactNode }) {
     const isSearch = !targetUrl.includes('.') || targetUrl.includes(' ');
     
     if (isSearch) {
-      // Use DuckDuckGo HTML Mirror for unblocked searches
-      targetUrl = `https://duckduckgo.com/html/?q=${encodeURIComponent(targetUrl)}`;
-      setActiveUrl(url);
-      setProxiedUrl(targetUrl);
+      // Use DuckDuckGo HTML Mirror for unblocked, frame-friendly searches
+      const searchUrl = `https://duckduckgo.com/html/?q=${encodeURIComponent(targetUrl)}`;
+      setActiveUrl(targetUrl);
+      setProxiedUrl(searchUrl);
     } else {
       if (!targetUrl.startsWith('http://') && !targetUrl.startsWith('https://')) {
         targetUrl = `https://${targetUrl}`;
       }
       setActiveUrl(targetUrl);
-      // Use AllOrigins Public CORS Gateway for generic URLs
+      
+      // Use AllOrigins Public CORS Gateway for generic URLs as a srcDoc fetch
+      // This is the most reliable way to attempt external site loads
       setProxiedUrl(`https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`);
     }
 

@@ -8,15 +8,26 @@ import { cn } from '@/lib/utils';
 
 const RizaLogo = () => (
   <svg viewBox="0 0 100 100" className="w-8 h-8" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect x="15" y="15" width="70" height="70" rx="12" className="fill-current opacity-10" />
     <path 
-      d="M35 25V75M35 25H55C65 25 72 32 72 42C72 52 65 59 55 59H35M52 59L72 75" 
+      d="M20 20H55C70 20 80 30 80 45C80 60 70 70 55 70H20V80" 
       stroke="currentColor" 
-      strokeWidth="10" 
+      strokeWidth="12" 
       strokeLinecap="round"
       strokeLinejoin="round"
     />
-    <circle cx="55" cy="42" r="4" fill="currentColor" className="animate-pulse" />
+    <path 
+      d="M20 45H50" 
+      stroke="currentColor" 
+      strokeWidth="12" 
+      strokeLinecap="round"
+    />
+    <path 
+      d="M50 70L80 90" 
+      stroke="currentColor" 
+      strokeWidth="12" 
+      strokeLinecap="round"
+    />
+    <circle cx="50" cy="45" r="5" fill="currentColor" className="animate-pulse" />
   </svg>
 );
 
