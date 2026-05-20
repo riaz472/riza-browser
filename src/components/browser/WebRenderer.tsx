@@ -25,7 +25,10 @@ export function WebRenderer() {
   );
 
   // The Google igu=1 parameter allows embedding in frames without Refuse-to-connect
-  const shellUrl = `https://www.google.com/search?igu=1&q=${encodeURIComponent(activeUrl)}`;
+  // It is the most reliable fallback for restricted cloud preview environments.
+  const shellUrl = activeUrl.startsWith('http') 
+    ? `https://www.google.com/search?igu=1&q=${encodeURIComponent(activeUrl)}`
+    : `https://www.google.com/search?igu=1&q=${encodeURIComponent(activeUrl)}`;
 
   return (
     <div className="flex-1 h-full flex flex-col bg-white overflow-hidden relative">

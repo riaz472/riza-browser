@@ -1,7 +1,7 @@
+
 import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
-  /* config options here */
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -30,6 +30,12 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // Experimental config for handling cloud preview hosts
+  experimental: {
+    serverActions: {
+      allowedOrigins: ['*']
+    }
+  }
 };
 
 export default nextConfig;
