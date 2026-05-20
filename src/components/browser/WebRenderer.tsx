@@ -6,25 +6,78 @@ import { Globe, Lock, RefreshCw, ShieldAlert, AlertCircle, Loader2 } from 'lucid
 
 export function WebRenderer() {
   const { proxiedUrl, activeUrl, isStealthMode } = useBrowser();
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [htmlContent, setHtmlContent] = useState<string>('');
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
-  // When the proxied URL changes, reset states
   useEffect(() => {
-    if (proxiedUrl) {
+    if (!proxiedUrl) {
+      setHtmlContent('');
+      setIsLoading(false);
+      return;
+    }
+
+    let isMounted = true;
+    const controller = new AbortController();
+
+    const fetchContent = async () => {
       setIsLoading(true);
       setError(null);
-    }
+
+      // 5-second timeout handler
+      const timeoutId = setTimeout(() => {
+        if (isMounted && isLoading) {
+          setIsLoading(false);
+          // We don't necessarily error out, just stop the spinner to show whatever is loading
+        }
+      }, 5000);
+
+      try {
+        const response = await fetch(proxiedUrl, { 
+          signal: controller.signal,
+          headers: { 'Accept': 'text/html' }
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Virtual node relay returned status ${response.status}`);
+        }
+
+        const contentType = response.headers.get('content-type') || '';
+        
+        if (contentType.includes('text/html')) {
+          const html = await response.text();
+          if (isMounted) {
+            setHtmlContent(html);
+            setIsLoading(false);
+          }
+        } else {
+          // Fallback for non-HTML resources (direct binary access)
+          if (isMounted) {
+            setHtmlContent(''); // Will trigger src fallback
+            setIsLoading(false);
+          }
+        }
+      } catch (err: any) {
+        if (isMounted && err.name !== 'AbortError') {
+          setError(err.message || "Virtual node failed to establish connection.");
+          setIsLoading(false);
+        }
+      } finally {
+        clearTimeout(timeoutId);
+      }
+    };
+
+    fetchContent();
+
+    return () => {
+      isMounted = false;
+      controller.abort();
+    };
   }, [proxiedUrl]);
 
-  const handleLoad = () => {
-    setIsLoading(false);
-  };
-
-  const handleError = () => {
-    setError("Virtual node failed to establish connection. The target host might be blocking proxy relays.");
-    setIsLoading(false);
+  const handleRefresh = () => {
+    window.location.reload();
   };
 
   if (!proxiedUrl) return (
@@ -39,7 +92,7 @@ export function WebRenderer() {
   return (
     <div className="flex-1 h-full flex flex-col bg-white overflow-hidden relative">
       {/* Loading Overlay */}
-      {isLoading && !error && (
+      {isLoading && (
         <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-obsidian/95 backdrop-blur-md transition-all duration-500">
           <div className="relative mb-8">
             <div className={`w-32 h-32 rounded-full border-b-2 border-t-2 ${isStealthMode ? 'border-cyber-crimson shadow-[0_0_30px_rgba(255,51,51,0.3)]' : 'border-cyber-blue shadow-[0_0_30px_rgba(51,139,255,0.3)]'} animate-spin`} />
@@ -49,7 +102,7 @@ export function WebRenderer() {
           </div>
           <div className="text-center space-y-4">
             <h3 className="text-sm font-black uppercase tracking-[0.2em]">Synchronizing Node</h3>
-            <p className="text-[10px] font-code opacity-40 truncate max-w-md mx-auto px-6">{activeUrl}</p>
+            <p className="text-[10px] font-code opacity-40 truncate max-w-md mx-auto px-6 font-bold">{activeUrl}</p>
           </div>
         </div>
       )}
@@ -61,7 +114,7 @@ export function WebRenderer() {
           <h3 className="text-xl font-headline font-bold mb-2">Node Relay Failure</h3>
           <p className="text-sm text-foreground/50 max-w-md mb-8">{error}</p>
           <button 
-            onClick={() => window.location.reload()}
+            onClick={handleRefresh}
             className="px-8 py-3 bg-white/5 border border-white/10 rounded-2xl text-xs font-bold uppercase tracking-widest hover:bg-white/10 transition-all"
           >
             Reconnect to Grid
@@ -76,16 +129,14 @@ export function WebRenderer() {
             <Lock className="w-3.5 h-3.5" />
             TLS 1.3 SECURE
           </span>
-          <span className="opacity-40">Identity: {isStealthMode ? 'Ghost Node' : 'Verified Agent'}</span>
+          <span className="opacity-40 font-bold">Identity: {isStealthMode ? 'Ghost Node' : 'Verified Agent'}</span>
         </div>
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-2">
             <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
             <span>Latency: 14ms</span>
           </div>
-          <button onClick={() => {
-            if (iframeRef.current) iframeRef.current.src = proxiedUrl;
-          }} className="hover:text-foreground transition-colors flex items-center gap-1.5">
+          <button onClick={handleRefresh} className="hover:text-foreground transition-colors flex items-center gap-1.5">
             <RefreshCw className="w-3 h-3" />
             Hard Refresh
           </button>
@@ -96,10 +147,9 @@ export function WebRenderer() {
       <div className="flex-1 bg-white relative">
         <iframe
           ref={iframeRef}
-          src={proxiedUrl}
+          src={htmlContent ? undefined : proxiedUrl}
+          srcDoc={htmlContent || undefined}
           className="w-full h-full border-none bg-white"
-          onLoad={handleLoad}
-          onError={handleError}
           title="Riza Virtual Rendering Context"
           sandbox="allow-forms allow-modals allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts allow-top-navigation-by-user-activation"
         />
