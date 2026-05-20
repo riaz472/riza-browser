@@ -1,14 +1,34 @@
 
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useBrowser } from '@/context/BrowserContext';
-import { Shield, Lock, EyeOff, Zap, ExternalLink, Activity, Globe } from 'lucide-react';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { Shield, Lock, EyeOff, Zap, ExternalLink, Activity, Globe, Server, Terminal } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export function Dashboard() {
   const { blockedAds, blockedTrackers, isStealthMode } = useBrowser();
+  const [trafficData, setTrafficData] = useState<number[]>(Array(30).fill(0).map(() => Math.random() * 80 + 20));
+  const [recentLogs, setRecentLogs] = useState<{ id: string; msg: string; timestamp: string }[]>([]);
+
+  // Simulation of real-time data flow
+  useEffect(() => {
+    const interval = setInterval(() => {
+      // Update graph
+      setTrafficData(prev => [...prev.slice(1), Math.random() * 80 + 20]);
+      
+      // Add random system logs
+      const logTypes = ['CONNECT', 'ENCRYPT', 'RELAY', 'BLOCK', 'ROUTE', 'HANDSHAKE'];
+      const logNodes = ['JP-TOK-1', 'US-NYC-4', 'DE-BER-9', 'UK-LON-2', 'SG-SIN-3'];
+      const newLog = {
+        id: Math.random().toString(36).substr(2, 9),
+        msg: `${logTypes[Math.floor(Math.random() * logTypes.length)]}: Node ${logNodes[Math.floor(Math.random() * logNodes.length)]} processed packet cluster`,
+        timestamp: new Date().toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })
+      };
+      setRecentLogs(prev => [newLog, ...prev].slice(0, 6));
+    }, 2500);
+    return () => clearInterval(interval);
+  }, []);
 
   const quickAccess = [
     { name: 'Google', icon: 'https://picsum.photos/seed/google/100/100', url: 'https://google.com' },
@@ -21,7 +41,7 @@ export function Dashboard() {
 
   return (
     <div className="flex-1 overflow-y-auto p-8 lg:p-12">
-      <div className="max-w-6xl mx-auto space-y-12">
+      <div className="max-w-6xl mx-auto space-y-12 pb-12">
         {/* Header */}
         <div className="text-center space-y-4">
           <h2 className={cn(
@@ -62,10 +82,63 @@ export function Dashboard() {
           </div>
         </div>
 
+        {/* Live Traffic & Activity */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 glass-panel rounded-3xl p-8 space-y-6 flex flex-col">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-bold uppercase tracking-[0.2em] flex items-center gap-2">
+                <Server className="w-4 h-4 text-cyber-blue" />
+                Packet Traffic Matrix
+              </h3>
+              <div className="flex gap-4 text-[10px] font-bold opacity-40">
+                <span>PEAK: 12.4 GBPS</span>
+                <span>STATUS: STABLE</span>
+              </div>
+            </div>
+            <div className="flex-1 flex items-end gap-1.5 h-32 px-2">
+              {trafficData.map((val, i) => (
+                <div 
+                  key={i} 
+                  className={cn(
+                    "flex-1 rounded-t-sm transition-all duration-700 ease-out",
+                    isStealthMode ? "bg-cyber-crimson/30" : "bg-cyber-blue/30"
+                  )}
+                  style={{ height: `${val}%` }}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="glass-panel rounded-3xl p-8 space-y-6 bg-obsidian/40 border-white/5">
+            <h3 className="text-xs font-bold uppercase tracking-[0.2em] flex items-center gap-2">
+              <Terminal className="w-4 h-4 text-cyber-purple" />
+              Node Activity Log
+            </h3>
+            <div className="space-y-4 overflow-hidden">
+              {recentLogs.map((log) => (
+                <div key={log.id} className="flex gap-3 text-[10px] font-code animate-in fade-in slide-in-from-right-2">
+                  <span className="opacity-30 shrink-0">[{log.timestamp}]</span>
+                  <span className={cn(
+                    "truncate",
+                    isStealthMode ? "text-cyber-crimson/70" : "text-cyber-blue/70"
+                  )}>
+                    {log.msg}
+                  </span>
+                </div>
+              ))}
+              {recentLogs.length === 0 && (
+                <div className="text-center opacity-10 py-10 text-[10px] uppercase tracking-widest">
+                  Initializing Streams...
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
         {/* Quick Access */}
         <div className="space-y-6">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold uppercase tracking-[0.2em] opacity-50">Quick Access Hub</h3>
+            <h3 className="text-xs font-bold uppercase tracking-[0.2em] opacity-30">Quick Access Hub</h3>
             <div className="h-px flex-1 mx-8 bg-white/5" />
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6">
@@ -88,8 +161,8 @@ export function Dashboard() {
         </div>
 
         {/* Tech Features Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-12">
-          <div className="flex gap-6 items-start p-6 rounded-3xl hover:bg-white/5 transition-colors">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-6">
+          <div className="flex gap-6 items-start p-8 rounded-3xl hover:bg-white/5 transition-colors glass-panel border-transparent">
             <div className="w-12 h-12 shrink-0 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10">
               <Globe className="w-6 h-6 text-cyber-blue" />
             </div>
@@ -100,7 +173,7 @@ export function Dashboard() {
               </p>
             </div>
           </div>
-          <div className="flex gap-6 items-start p-6 rounded-3xl hover:bg-white/5 transition-colors">
+          <div className="flex gap-6 items-start p-8 rounded-3xl hover:bg-white/5 transition-colors glass-panel border-transparent">
             <div className="w-12 h-12 shrink-0 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10">
               <Lock className="w-6 h-6 text-cyber-purple" />
             </div>
