@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Terminal, Play, Save, RotateCcw, Copy, Trash2, Command } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -23,9 +23,14 @@ const app = {
 
 app.init();`);
 
-  const [logs, setLogs] = useState<{ type: 'info' | 'error' | 'success', msg: string, time: string }[]>([
-    { type: 'info', msg: 'Riza Terminal Ready.', time: new Date().toLocaleTimeString() }
-  ]);
+  const [logs, setLogs] = useState<{ type: 'info' | 'error' | 'success', msg: string, time: string }[]>([]);
+
+  useEffect(() => {
+    // Set initial log only on client to avoid hydration mismatch
+    setLogs([
+      { type: 'info', msg: 'Riza Terminal Ready.', time: new Date().toLocaleTimeString() }
+    ]);
+  }, []);
 
   const runScript = () => {
     setLogs(prev => [{ 

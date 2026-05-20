@@ -8,11 +8,15 @@ import { cn } from '@/lib/utils';
 
 export function Dashboard() {
   const { blockedAds, blockedTrackers, isStealthMode } = useBrowser();
-  const [trafficData, setTrafficData] = useState<number[]>(Array(30).fill(0).map(() => Math.random() * 80 + 20));
+  // Initialize with zeros to avoid hydration mismatch
+  const [trafficData, setTrafficData] = useState<number[]>(Array(30).fill(0));
   const [recentLogs, setRecentLogs] = useState<{ id: string; msg: string; timestamp: string }[]>([]);
 
   // Simulation of real-time data flow
   useEffect(() => {
+    // Populate initial random data only on client mount
+    setTrafficData(Array(30).fill(0).map(() => Math.random() * 80 + 20));
+
     const interval = setInterval(() => {
       // Update graph
       setTrafficData(prev => [...prev.slice(1), Math.random() * 80 + 20]);
