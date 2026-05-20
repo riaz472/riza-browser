@@ -82,16 +82,16 @@ export function BrowserProvider({ children }: { children: React.ReactNode }) {
     let finalActiveUrl = targetUrl;
 
     if (isSearch) {
-      // Route search to DuckDuckGo via CORS proxy
-      const ddgUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(targetUrl)}`;
-      finalProxiedUrl = `https://corsproxy.io/?url=${encodeURIComponent(ddgUrl)}`;
+      // Direct embedding for search (DuckDuckGo natively allows iframes)
+      finalActiveUrl = targetUrl;
+      finalProxiedUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(targetUrl)}`;
     } else {
       if (!targetUrl.startsWith('http://') && !targetUrl.startsWith('https://')) {
         targetUrl = `https://${targetUrl}`;
       }
       finalActiveUrl = targetUrl;
-      // Use Public CORS Proxy for direct URL rendering
-      finalProxiedUrl = `https://corsproxy.io/?url=${encodeURIComponent(targetUrl)}`;
+      // Use AllOrigins (Open Source / Free) for direct URLs
+      finalProxiedUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
     }
 
     setActiveUrl(finalActiveUrl);

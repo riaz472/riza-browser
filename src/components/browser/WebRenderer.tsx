@@ -33,7 +33,7 @@ export function WebRenderer() {
         </div>
       )}
 
-      {/* Full Viewport Iframe */}
+      {/* Full Viewport Iframe with optimized sandbox and high-reliability proxy routing */}
       <iframe
         src={proxiedUrl}
         className="flex-1 w-full h-full border-none bg-white"
