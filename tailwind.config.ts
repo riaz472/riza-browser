@@ -1,3 +1,4 @@
+
 import type {Config} from 'tailwindcss';
 
 export default {
@@ -11,12 +12,16 @@ export default {
     extend: {
       fontFamily: {
         body: ['Inter', 'sans-serif'],
-        headline: ['Inter', 'sans-serif'],
-        code: ['monospace'],
+        headline: ['Space Grotesk', 'sans-serif'],
+        code: ['JetBrains Mono', 'monospace'],
       },
       colors: {
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
+        'cyber-blue': '#338BFF',
+        'cyber-purple': '#A633FF',
+        'cyber-crimson': '#FF3333',
+        'obsidian': '#080A0D',
         card: {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
@@ -88,10 +93,20 @@ export default {
             height: '0',
           },
         },
+        'glow-pulse': {
+          '0%, 100%': { boxShadow: '0 0 5px rgba(51, 139, 255, 0.5), 0 0 10px rgba(51, 139, 255, 0.3)' },
+          '50%': { boxShadow: '0 0 20px rgba(51, 139, 255, 0.8), 0 0 30px rgba(51, 139, 255, 0.5)' },
+        },
+        'crimson-pulse': {
+          '0%, 100%': { boxShadow: '0 0 5px rgba(255, 51, 51, 0.5), 0 0 10px rgba(255, 51, 51, 0.3)' },
+          '50%': { boxShadow: '0 0 20px rgba(255, 51, 51, 0.8), 0 0 30px rgba(255, 51, 51, 0.5)' },
+        }
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
+        'glow-pulse': 'glow-pulse 3s infinite',
+        'crimson-pulse': 'crimson-pulse 3s infinite',
       },
     },
   },
