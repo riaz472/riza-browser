@@ -25,13 +25,12 @@ export function WebRenderer() {
       setIsLoading(true);
       setError(null);
 
-      // 5-second timeout handler
+      // Force-resolve loading state after 8 seconds if fetch hangs
       const timeoutId = setTimeout(() => {
         if (isMounted && isLoading) {
           setIsLoading(false);
-          // We don't necessarily error out, just stop the spinner to show whatever is loading
         }
-      }, 5000);
+      }, 8000);
 
       try {
         const response = await fetch(proxiedUrl, { 
@@ -43,20 +42,10 @@ export function WebRenderer() {
           throw new Error(`Virtual node relay returned status ${response.status}`);
         }
 
-        const contentType = response.headers.get('content-type') || '';
-        
-        if (contentType.includes('text/html')) {
-          const html = await response.text();
-          if (isMounted) {
-            setHtmlContent(html);
-            setIsLoading(false);
-          }
-        } else {
-          // Fallback for non-HTML resources (direct binary access)
-          if (isMounted) {
-            setHtmlContent(''); // Will trigger src fallback
-            setIsLoading(false);
-          }
+        const html = await response.text();
+        if (isMounted) {
+          setHtmlContent(html);
+          setIsLoading(false);
         }
       } catch (err: any) {
         if (isMounted && err.name !== 'AbortError') {
@@ -147,11 +136,10 @@ export function WebRenderer() {
       <div className="flex-1 bg-white relative">
         <iframe
           ref={iframeRef}
-          src={htmlContent ? undefined : proxiedUrl}
           srcDoc={htmlContent || undefined}
           className="w-full h-full border-none bg-white"
           title="Riza Virtual Rendering Context"
-          sandbox="allow-forms allow-modals allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts allow-top-navigation-by-user-activation"
+          sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
         />
       </div>
 
