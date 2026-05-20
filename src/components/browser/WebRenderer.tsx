@@ -5,11 +5,24 @@ import { useBrowser } from '@/context/BrowserContext';
 import { Globe, Lock, RefreshCw, ShieldAlert, AlertCircle, Loader2 } from 'lucide-react';
 
 export function WebRenderer() {
-  const { proxiedUrl, activeUrl, isStealthMode } = useBrowser();
+  const { proxiedUrl, activeUrl, isStealthMode, navigate } = useBrowser();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [htmlContent, setHtmlContent] = useState<string>('');
   const iframeRef = useRef<HTMLIFrameElement>(null);
+
+  // Listen for navigation messages from the proxied iframe
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      // Ensure message is from the proxy logic we injected
+      if (event.data?.type === 'NAVIGATE' && event.data?.url) {
+        navigate(event.data.url);
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [navigate]);
 
   useEffect(() => {
     if (!proxiedUrl) {
@@ -66,7 +79,7 @@ export function WebRenderer() {
   }, [proxiedUrl]);
 
   const handleRefresh = () => {
-    window.location.reload();
+    navigate(activeUrl);
   };
 
   if (!proxiedUrl) return (

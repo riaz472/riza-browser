@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 /**
- * RizaBrowser Proxy Engine v3.0
- * Deep-content inspection and rewriting engine to bypass CORS and frame policies.
+ * Riza Proxy Engine v4.0 - Production Mirroring
+ * Features: Absolute URL rewriting, Script injection for link interception,
+ * User-Agent spoofing, and automatic search engine fallback.
  */
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -15,38 +16,82 @@ export async function GET(request: NextRequest) {
   try {
     const url = new URL(targetUrl);
     
-    // Set a clean modern desktop User-Agent to get standard desktop views
+    // 1. Production-grade Desktop Chrome User-Agent Spoofing
     const response = await fetch(targetUrl, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.9',
       },
+      next: { revalidate: 0 } // Bypass cache for live content
     });
 
+    // 2. Strict Dynamic Fallback for blocked/failing nodes
     if (!response.ok && response.status !== 404) {
-      throw new Error(`Target returned status ${response.status}`);
+      const fallbackUrl = `https://duckduckgo.com/html/?q=${encodeURIComponent(targetUrl)}`;
+      return NextResponse.redirect(`${new URL(request.url).origin}/api/proxy?url=${encodeURIComponent(fallbackUrl)}`);
     }
 
     const contentType = response.headers.get('content-type') || '';
+    const finalUrl = new URL(response.url); // Handle redirects
     
     if (contentType.includes('text/html')) {
       let html = await response.text();
       
-      // 1. Inject <base> tag to help resolve remaining relative assets
-      const baseTag = `<base href="${url.origin}${url.pathname}">`;
-      html = html.replace('<head>', `<head>${baseTag}`);
+      // 3. Response Mirroring & Script Injection Module
+      // Injects absolute base tag and a communication bridge for the parent browser
+      const injection = `
+        <base href="${finalUrl.origin}${finalUrl.pathname}">
+        <script>
+          // Global error survival layer
+          window.onerror = function() { return true; };
+          
+          // Link Interception Bridge
+          document.addEventListener('click', function(e) {
+            let target = e.target.closest('a');
+            if(target && target.href) {
+              const href = target.getAttribute('href');
+              if (href && !href.startsWith('#') && !href.startsWith('javascript:')) {
+                e.preventDefault();
+                try {
+                  const absoluteUrl = new URL(href, window.location.href).href;
+                  window.parent.postMessage({ type: 'NAVIGATE', url: absoluteUrl }, '*');
+                } catch(err) {}
+              }
+            }
+          }, true);
 
-      // 2. Comprehensive URL Rewriting Module
-      const proxyBase = `${new URL(request.url).origin}/api/proxy?url=`;
+          // Form Submission Interception (Search engines support)
+          document.addEventListener('submit', function(e) {
+            const form = e.target;
+            if (form.method.toLowerCase() === 'get') {
+              e.preventDefault();
+              const formData = new FormData(form);
+              const params = new URLSearchParams();
+              for (const [key, value] of formData.entries()) {
+                params.append(key, value.toString());
+              }
+              const action = form.getAttribute('action') || '';
+              try {
+                const absoluteUrl = new URL(action, window.location.href).href;
+                const finalUrl = absoluteUrl + (absoluteUrl.includes('?') ? '&' : '?') + params.toString();
+                window.parent.postMessage({ type: 'NAVIGATE', url: finalUrl }, '*');
+              } catch(err) {}
+            }
+          }, true);
+        </script>
+      `;
       
+      // Inject at the beginning of head
+      html = html.replace('<head>', `<head>${injection}`);
+
+      // 4. Absolute URL Rewriting Module
+      const proxyBase = `${new URL(request.url).origin}/api/proxy?url=`;
       const rewriteAttribute = (content: string, attr: string) => {
-        // Regex matches attr="url" or attr='url'
         const regex = new RegExp(`${attr}=(['"])((?!#|data:|javascript:|mailto:|tel:)[^'"]+)\\1`, 'gi');
         return content.replace(regex, (match, quote, p1) => {
           try {
-            // Convert relative/absolute paths to absolute URLs relative to target
-            const absoluteUrl = new URL(p1, url.href).href;
-            // Wrap in our proxy
+            const absoluteUrl = new URL(p1, finalUrl.href).href;
             return `${attr}=${quote}${proxyBase}${encodeURIComponent(absoluteUrl)}${quote}`;
           } catch (e) {
             return match;
@@ -54,17 +99,15 @@ export async function GET(request: NextRequest) {
         });
       };
 
-      // Rewriting key attributes for deep asset and link redirection
       html = rewriteAttribute(html, 'href');
       html = rewriteAttribute(html, 'src');
-      html = rewriteAttribute(html, 'action'); // Crucial for forms
+      html = rewriteAttribute(html, 'action');
 
-      // 3. Construct clean response headers
-      // We explicitly DO NOT copy upstream security headers (CSP, X-Frame, etc)
+      // 5. Explicit Header Stripping & Content Spoofing
       const headers = new Headers();
-      headers.set('Content-Type', 'text/html');
-      headers.set('X-Frame-Options', 'ALLOWALL');
+      headers.set('Content-Type', 'text/html; charset=utf-8');
       headers.set('Access-Control-Allow-Origin', '*');
+      headers.set('X-Frame-Options', 'ALLOWALL');
       headers.set('Content-Security-Policy', "default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; frame-ancestors *;");
 
       return new NextResponse(html, {
@@ -73,7 +116,7 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // 4. Pass-through for non-HTML resources (Images, JS, CSS)
+    // Pass-through for assets (Images, CSS, JS)
     const body = await response.arrayBuffer();
     const headers = new Headers();
     headers.set('Content-Type', contentType);
@@ -86,6 +129,8 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error: any) {
-    return new NextResponse(`Proxy Relay Error: ${error.message}`, { status: 500 });
+    // Ultimate fallback to functional search engine mirror
+    const fallbackUrl = `https://duckduckgo.com/html/`;
+    return NextResponse.redirect(`${new URL(request.url).origin}/api/proxy?url=${encodeURIComponent(fallbackUrl)}`);
   }
 }
