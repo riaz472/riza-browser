@@ -1,191 +1,159 @@
-
 "use client";
 
 import React, { useState, useEffect } from 'react';
 import { useBrowser } from '@/context/BrowserContext';
-import { Shield, Lock, EyeOff, Zap, ExternalLink, Activity, Globe, Server, Terminal } from 'lucide-react';
+import { 
+  ShieldCheck, Activity, Cpu, Timer, Globe, 
+  Wallet, Zap, Lock, CreditCard, ChevronRight,
+  TrendingUp, ArrowUpRight
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export function Dashboard() {
-  const { blockedAds, blockedTrackers, isStealthMode } = useBrowser();
-  // Initialize with zeros to avoid hydration mismatch
-  const [trafficData, setTrafficData] = useState<number[]>(Array(30).fill(0));
-  const [recentLogs, setRecentLogs] = useState<{ id: string; msg: string; timestamp: string }[]>([]);
+  const { blockedAds, blockedTrackers, wallet } = useBrowser();
+  const [stats, setStats] = useState({
+    speed: '84.2 Mbps',
+    memory: '1.2 GB / 16 GB',
+    security: 98,
+    timer: '00:00:00'
+  });
 
-  // Simulation of real-time data flow
   useEffect(() => {
-    // Populate initial random data only on client mount
-    setTrafficData(Array(30).fill(0).map(() => Math.random() * 80 + 20));
-
+    const startTime = Date.now();
     const interval = setInterval(() => {
-      // Update graph
-      setTrafficData(prev => [...prev.slice(1), Math.random() * 80 + 20]);
+      const elapsed = Date.now() - startTime;
+      const h = Math.floor(elapsed / 3600000).toString().padStart(2, '0');
+      const m = Math.floor((elapsed % 3600000) / 60000).toString().padStart(2, '0');
+      const s = Math.floor((elapsed % 60000) / 1000).toString().padStart(2, '0');
       
-      // Add random system logs
-      const logTypes = ['CONNECT', 'ENCRYPT', 'RELAY', 'BLOCK', 'ROUTE', 'HANDSHAKE'];
-      const logNodes = ['JP-TOK-1', 'US-NYC-4', 'DE-BER-9', 'UK-LON-2', 'SG-SIN-3'];
-      const newLog = {
-        id: Math.random().toString(36).substr(2, 9),
-        msg: `${logTypes[Math.floor(Math.random() * logTypes.length)]}: Node ${logNodes[Math.floor(Math.random() * logNodes.length)]} processed packet cluster`,
-        timestamp: new Date().toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })
-      };
-      setRecentLogs(prev => [newLog, ...prev].slice(0, 6));
-    }, 2500);
+      setStats(prev => ({
+        ...prev,
+        timer: `${h}:${m}:${s}`,
+        memory: `${(1.1 + Math.random() * 0.2).toFixed(1)} GB / 16 GB`,
+        speed: `${(80 + Math.random() * 10).toFixed(1)} Mbps`
+      }));
+    }, 1000);
     return () => clearInterval(interval);
   }, []);
 
-  const quickAccess = [
-    { name: 'Google', icon: 'https://picsum.photos/seed/google/100/100', url: 'https://google.com' },
-    { name: 'YouTube', icon: 'https://picsum.photos/seed/youtube/100/100', url: 'https://youtube.com' },
-    { name: 'TikTok', icon: 'https://picsum.photos/seed/tiktok/100/100', url: 'https://tiktok.com' },
-    { name: 'Discord', icon: 'https://picsum.photos/seed/discord/100/100', url: 'https://discord.com' },
-    { name: 'GitHub', icon: 'https://picsum.photos/seed/github/100/100', url: 'https://github.com' },
-    { name: 'X', icon: 'https://picsum.photos/seed/twitter/100/100', url: 'https://x.com' },
-  ];
-
   return (
-    <div className="flex-1 overflow-y-auto p-8 lg:p-12">
-      <div className="max-w-6xl mx-auto space-y-12 pb-12">
-        {/* Header */}
-        <div className="text-center space-y-4">
-          <h2 className={cn(
-            "text-6xl font-headline font-black tracking-tighter transition-all duration-700",
-            isStealthMode ? "text-cyber-crimson drop-shadow-[0_0_15px_rgba(255,51,51,0.5)]" : "text-cyber-blue drop-shadow-[0_0_15px_rgba(51,139,255,0.5)]"
-          )}>
-            rizabrowser
-          </h2>
-          <p className="text-xl text-foreground/60 font-medium">
-            The Ultimate Premium Proxy Node & Developer Toolkit
-          </p>
-        </div>
-
-        {/* Shield Monitor */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="glass-panel rounded-3xl p-8 flex flex-col items-center text-center group hover:border-primary/50 transition-all">
-            <div className="w-16 h-16 rounded-2xl bg-cyber-blue/10 flex items-center justify-center mb-6 border border-cyber-blue/20 group-hover:scale-110 transition-transform">
-              <Shield className="w-8 h-8 text-cyber-blue" />
-            </div>
-            <div className="text-4xl font-headline font-bold mb-2 tabular-nums">{blockedAds}</div>
-            <div className="text-sm font-bold uppercase tracking-widest opacity-40">Ads Blocked</div>
-          </div>
-
-          <div className="glass-panel rounded-3xl p-8 flex flex-col items-center text-center group hover:border-accent/50 transition-all">
-            <div className="w-16 h-16 rounded-2xl bg-cyber-purple/10 flex items-center justify-center mb-6 border border-cyber-purple/20 group-hover:scale-110 transition-transform">
-              <Zap className="w-8 h-8 text-cyber-purple" />
-            </div>
-            <div className="text-4xl font-headline font-bold mb-2 tabular-nums">{blockedTrackers}</div>
-            <div className="text-sm font-bold uppercase tracking-widest opacity-40">Trackers Deflected</div>
-          </div>
-
-          <div className="glass-panel rounded-3xl p-8 flex flex-col items-center text-center group hover:border-primary/50 transition-all">
-            <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center mb-6 border border-white/10 group-hover:scale-110 transition-transform">
-              <Activity className="w-8 h-8 text-cyber-blue" />
-            </div>
-            <div className="text-4xl font-headline font-bold mb-2">99.9%</div>
-            <div className="text-sm font-bold uppercase tracking-widest opacity-40">Anonymity Score</div>
-          </div>
-        </div>
-
-        {/* Live Traffic & Activity */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 glass-panel rounded-3xl p-8 space-y-6 flex flex-col">
-            <div className="flex items-center justify-between">
-              <h3 className="text-xs font-bold uppercase tracking-[0.2em] flex items-center gap-2">
-                <Server className="w-4 h-4 text-cyber-blue" />
-                Packet Traffic Matrix
-              </h3>
-              <div className="flex gap-4 text-[10px] font-bold opacity-40">
-                <span>PEAK: 12.4 GBPS</span>
-                <span>STATUS: STABLE</span>
+    <div className="flex-1 overflow-y-auto p-12 custom-scrollbar">
+      <div className="max-w-6xl mx-auto space-y-12">
+        {/* Hero Header */}
+        <div className="flex justify-between items-end">
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-[10px] font-black uppercase tracking-widest text-primary">
+                System Online
+              </div>
+              <div className="text-slate-400 text-xs font-bold uppercase tracking-widest">
+                Node Location: Tokyo-Edge-4
               </div>
             </div>
-            <div className="flex-1 flex items-end gap-1.5 h-32 px-2">
-              {trafficData.map((val, i) => (
-                <div 
-                  key={i} 
-                  className={cn(
-                    "flex-1 rounded-t-sm transition-all duration-700 ease-out",
-                    isStealthMode ? "bg-cyber-crimson/30" : "bg-cyber-blue/30"
-                  )}
-                  style={{ height: `${val}%` }}
-                />
-              ))}
-            </div>
+            <h2 className="text-6xl font-headline font-black tracking-tighter text-slate-900">
+              Welcome to <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">RizaBrowser</span>
+            </h2>
           </div>
-
-          <div className="glass-panel rounded-3xl p-8 space-y-6 bg-obsidian/40 border-white/5">
-            <h3 className="text-xs font-bold uppercase tracking-[0.2em] flex items-center gap-2">
-              <Terminal className="w-4 h-4 text-cyber-purple" />
-              Node Activity Log
-            </h3>
-            <div className="space-y-4 overflow-hidden">
-              {recentLogs.map((log) => (
-                <div key={log.id} className="flex gap-3 text-[10px] font-code animate-in fade-in slide-in-from-right-2">
-                  <span className="opacity-30 shrink-0">[{log.timestamp}]</span>
-                  <span className={cn(
-                    "truncate",
-                    isStealthMode ? "text-cyber-crimson/70" : "text-cyber-blue/70"
-                  )}>
-                    {log.msg}
-                  </span>
-                </div>
-              ))}
-              {recentLogs.length === 0 && (
-                <div className="text-center opacity-10 py-10 text-[10px] uppercase tracking-widest">
-                  Initializing Streams...
-                </div>
-              )}
+          <div className="hidden lg:block">
+            <div className="glass-panel px-6 py-4 rounded-3xl flex items-center gap-6">
+              <div className="text-right">
+                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Global Rank</div>
+                <div className="text-xl font-bold font-headline">#1,402</div>
+              </div>
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-primary to-accent flex items-center justify-center text-white shadow-lg">
+                <TrendingUp className="w-6 h-6" />
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Quick Access */}
-        <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <h3 className="text-xs font-bold uppercase tracking-[0.2em] opacity-30">Quick Access Hub</h3>
-            <div className="h-px flex-1 mx-8 bg-white/5" />
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6">
-            {quickAccess.map((site) => (
-              <a
-                key={site.name}
-                href={site.url}
-                className="glass-panel aspect-square rounded-3xl p-6 flex flex-col items-center justify-center gap-4 hover:scale-105 hover:bg-white/5 transition-all group relative overflow-hidden"
-              >
-                <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <ExternalLink className="w-4 h-4 text-cyber-blue" />
+        {/* Dynamic Stats Row */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[
+            { label: 'Network Speed', value: stats.speed, icon: Globe, color: 'text-primary' },
+            { label: 'Memory Leakage', value: stats.memory, icon: Cpu, color: 'text-accent' },
+            { label: 'Security Core', value: `${stats.security}%`, icon: ShieldCheck, color: 'text-green-500' },
+            { label: 'Session Timer', value: stats.timer, icon: Timer, color: 'text-slate-600' }
+          ].map((item, i) => (
+            <div key={i} className="glass-panel p-6 rounded-[2rem] hover:scale-[1.02] transition-transform cursor-default group">
+              <div className="flex items-center justify-between mb-4">
+                <div className={cn("w-12 h-12 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center transition-colors group-hover:bg-white", item.color)}>
+                  <item.icon className="w-6 h-6" />
                 </div>
-                <div className="w-14 h-14 rounded-2xl overflow-hidden shadow-2xl group-hover:shadow-primary/20 transition-all">
-                  <img src={site.icon} alt={site.name} className="w-full h-full object-cover" />
-                </div>
-                <span className="text-xs font-bold uppercase tracking-wider">{site.name}</span>
-              </a>
-            ))}
-          </div>
+                <ArrowUpRight className="w-5 h-5 opacity-10 group-hover:opacity-100 transition-opacity" />
+              </div>
+              <div className="text-2xl font-headline font-black text-slate-900">{item.value}</div>
+              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">{item.label}</div>
+            </div>
+          ))}
         </div>
 
-        {/* Tech Features Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-6">
-          <div className="flex gap-6 items-start p-8 rounded-3xl hover:bg-white/5 transition-colors glass-panel border-transparent">
-            <div className="w-12 h-12 shrink-0 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10">
-              <Globe className="w-6 h-6 text-cyber-blue" />
-            </div>
-            <div>
-              <h4 className="text-lg font-bold mb-2">Quantum Proxy Nodes</h4>
-              <p className="text-sm text-foreground/50 leading-relaxed">
-                Experience ultra-low latency with our distributed global network of proxy nodes, designed for stealth and speed.
-              </p>
-            </div>
+        {/* Wallet & Activity Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 glass-panel p-10 rounded-[2.5rem] relative overflow-hidden group">
+             <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full -mr-32 -mt-32 blur-3xl" />
+             <div className="relative z-10 flex flex-col h-full justify-between">
+                <div>
+                  <div className="flex items-center justify-between mb-8">
+                    <h3 className="text-2xl font-headline font-bold flex items-center gap-3">
+                      <Wallet className="w-7 h-7 text-primary" />
+                      RizaWallet Assets
+                    </h3>
+                    <div className="flex items-center gap-2 text-xs font-bold text-slate-400">
+                      <Lock className="w-3 h-3" />
+                      Biometric Secured
+                    </div>
+                  </div>
+                  <div className="flex items-end gap-4 mb-10">
+                    <span className="text-5xl font-headline font-black text-slate-900">${wallet.balance}</span>
+                    <span className="text-green-500 font-bold mb-1.5 flex items-center gap-1">
+                      <TrendingUp className="w-4 h-4" />
+                      +4.2%
+                    </span>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-3 gap-6">
+                  <button className="flex flex-col items-center gap-3 p-6 rounded-3xl bg-slate-50 hover:bg-white border border-slate-100 transition-all shadow-sm hover:shadow-md">
+                    <Zap className="w-6 h-6 text-primary" />
+                    <span className="text-[10px] font-bold uppercase tracking-widest">Stake</span>
+                  </button>
+                  <button className="flex flex-col items-center gap-3 p-6 rounded-3xl bg-slate-50 hover:bg-white border border-slate-100 transition-all shadow-sm hover:shadow-md">
+                    <CreditCard className="w-6 h-6 text-accent" />
+                    <span className="text-[10px] font-bold uppercase tracking-widest">Card</span>
+                  </button>
+                  <button className="flex flex-col items-center gap-3 p-6 rounded-3xl bg-slate-50 hover:bg-white border border-slate-100 transition-all shadow-sm hover:shadow-md">
+                    <Activity className="w-6 h-6 text-green-500" />
+                    <span className="text-[10px] font-bold uppercase tracking-widest">Nodes</span>
+                  </button>
+                </div>
+             </div>
           </div>
-          <div className="flex gap-6 items-start p-8 rounded-3xl hover:bg-white/5 transition-colors glass-panel border-transparent">
-            <div className="w-12 h-12 shrink-0 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10">
-              <Lock className="w-6 h-6 text-cyber-purple" />
+
+          <div className="glass-panel p-10 rounded-[2.5rem] flex flex-col space-y-8">
+            <h3 className="text-xl font-headline font-bold">Privacy Shield</h3>
+            <div className="space-y-6">
+               <div className="flex items-center justify-between">
+                 <div className="text-sm font-bold text-slate-500">Ads Deflected</div>
+                 <div className="text-lg font-black font-headline text-primary">{blockedAds}</div>
+               </div>
+               <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                 <div className="h-full bg-primary" style={{ width: '75%' }} />
+               </div>
+               
+               <div className="flex items-center justify-between">
+                 <div className="text-sm font-bold text-slate-500">Trackers Blocked</div>
+                 <div className="text-lg font-black font-headline text-accent">{blockedTrackers}</div>
+               </div>
+               <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                 <div className="h-full bg-accent" style={{ width: '60%' }} />
+               </div>
             </div>
-            <div>
-              <h4 className="text-lg font-bold mb-2">Biometric Encryption</h4>
-              <p className="text-sm text-foreground/50 leading-relaxed">
-                Your credentials are encrypted using military-grade AES-256 protocols and secured via local machine binding.
-              </p>
+            <div className="pt-6 border-t border-slate-100">
+              <button className="w-full py-4 rounded-2xl bg-slate-900 text-white font-bold text-sm hover:bg-slate-800 transition-colors flex items-center justify-center gap-2">
+                Generate VPN Node
+                <ChevronRight className="w-4 h-4" />
+              </button>
             </div>
           </div>
         </div>
