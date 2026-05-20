@@ -11,6 +11,7 @@ interface BrowserContextType {
   currentView: BrowserView;
   setView: (view: BrowserView) => void;
   activeUrl: string;
+  proxiedUrl: string;
   navigate: (url: string) => void;
   history: string[];
   blockedAds: number;
@@ -33,6 +34,7 @@ export function BrowserProvider({ children }: { children: React.ReactNode }) {
   const [isStealthMode, setIsStealthMode] = useState(false);
   const [currentView, setCurrentView] = useState<BrowserView>('home');
   const [activeUrl, setActiveUrl] = useState('');
+  const [proxiedUrl, setProxiedUrl] = useState('');
   const [history, setHistory] = useState<string[]>([]);
   const [blockedAds, setBlockedAds] = useState(0);
   const [blockedTrackers, setBlockedTrackers] = useState(0);
@@ -57,8 +59,6 @@ export function BrowserProvider({ children }: { children: React.ReactNode }) {
       const next = !prev;
       if (next) {
         document.documentElement.classList.add('stealth-mode');
-        localStorage.clear();
-        sessionStorage.clear();
       } else {
         document.documentElement.classList.remove('stealth-mode');
       }
@@ -70,6 +70,13 @@ export function BrowserProvider({ children }: { children: React.ReactNode }) {
     let targetUrl = url.trim();
     if (!targetUrl) return;
 
+    // Handle home internal route
+    if (targetUrl === 'rizabrowser://home') {
+      setView('home');
+      return;
+    }
+
+    // Protocol check
     if (!targetUrl.startsWith('http://') && !targetUrl.startsWith('https://') && !targetUrl.includes('://')) {
       if (targetUrl.includes('.') && !targetUrl.includes(' ')) {
         targetUrl = `https://${targetUrl}`;
@@ -79,13 +86,18 @@ export function BrowserProvider({ children }: { children: React.ReactNode }) {
     }
 
     setActiveUrl(targetUrl);
+    // Route through the local proxy to bypass CORS/X-Frame-Options
+    setProxiedUrl(`/api/proxy?url=${encodeURIComponent(targetUrl)}`);
     setHistory(prev => [targetUrl, ...prev].slice(0, 50));
     setCurrentView('browser');
   };
 
   const setView = (view: BrowserView) => {
     setCurrentView(view);
-    if (view === 'home') setActiveUrl('');
+    if (view === 'home') {
+      setActiveUrl('');
+      setProxiedUrl('');
+    }
   };
 
   return (
@@ -96,6 +108,7 @@ export function BrowserProvider({ children }: { children: React.ReactNode }) {
         currentView,
         setView,
         activeUrl,
+        proxiedUrl,
         navigate,
         history,
         blockedAds,
