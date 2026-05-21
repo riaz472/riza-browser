@@ -22,7 +22,7 @@ export function WalletView() {
             <WalletIcon d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" size={40} color="#338BFF" />
           </div>
           <div className="space-y-3">
-            <h2 className="text-4xl font-headline font-black">Vault Encrypted</h2>
+            <h2 className="text-4xl font-headline font-black text-slate-900">Vault Encrypted</h2>
             <p className="text-slate-400 text-sm font-bold uppercase tracking-widest">Biometric signature required.</p>
           </div>
           <button 
@@ -41,7 +41,7 @@ export function WalletView() {
       <div className="max-w-6xl mx-auto space-y-12">
         <div className="flex items-center justify-between">
            <div className="space-y-2">
-             <h2 className="text-4xl font-headline font-black flex items-center gap-5">
+             <h2 className="text-4xl font-headline font-black flex items-center gap-5 text-slate-900">
                <div className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center text-white shadow-xl">
                  <WalletIcon d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4M4 6v12c0 1.1.9 2 2 2h14v-4M16 12h4" size={24} />
                </div>
@@ -49,7 +49,7 @@ export function WalletView() {
              </h2>
              <p className="text-slate-400 font-black uppercase tracking-[0.3em] text-[10px]">Premium Decentralized Node Banking</p>
            </div>
-           <button onClick={() => wallet.setLocked(true)} className="px-8 py-3 rounded-2xl border border-slate-200 font-black text-[10px] uppercase tracking-widest hover:bg-white transition-all">
+           <button onClick={() => wallet.setLocked(true)} className="px-8 py-3 rounded-2xl border border-slate-200 font-black text-[10px] uppercase tracking-widest hover:bg-white transition-all text-slate-600">
              Lock Vault
            </button>
         </div>
@@ -86,7 +86,7 @@ export function WalletView() {
                         <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center transition-all group-hover:scale-110">
                            <WalletIcon d="M22 2L11 13 M22 2l-7 20-4-9-9-4 20-7z" size={20} color="inherit" />
                         </div>
-                        <span className="text-[10px] font-black uppercase tracking-[0.3em]">{label}</span>
+                        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-600 group-hover:text-white">{label}</span>
                       </button>
                     ))}
                   </div>
@@ -96,7 +96,7 @@ export function WalletView() {
 
           <div className="space-y-10">
             <div className="glass-panel p-12 rounded-[3.5rem] space-y-10 border-white/60">
-              <h3 className="text-xl font-headline font-black">Asset Status</h3>
+              <h3 className="text-xl font-headline font-black text-slate-900">Asset Status</h3>
               <div className="space-y-8">
                 {[
                   { label: 'RIZA Tokens', value: 65, color: 'bg-primary' },

@@ -10,19 +10,28 @@ export function WebRenderer() {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (activeUrl) setIsLoading(true);
+    if (activeUrl) {
+      setIsLoading(true);
+    }
   }, [activeUrl]);
 
-  if (!activeUrl) return (
-    <div className="flex-1 h-full flex flex-col items-center justify-center bg-slate-50/50">
-      <div className="text-center space-y-8">
-        <div className="w-24 h-24 rounded-[2.5rem] bg-white border border-slate-100 flex items-center justify-center mx-auto shadow-xl animate-pulse">
-          <svg viewBox="0 0 24 24" className="w-12 h-12 text-primary/30" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+  if (!activeUrl) {
+    return (
+      <div className="flex-1 h-full flex flex-col items-center justify-center bg-slate-50/50">
+        <div className="text-center space-y-8 animate-in fade-in duration-1000">
+          <div className="w-24 h-24 rounded-[2.5rem] bg-white border border-slate-100 flex items-center justify-center mx-auto shadow-2xl animate-pulse">
+            <svg viewBox="0 0 24 24" className="w-12 h-12 text-primary/30" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            </svg>
+          </div>
+          <div className="space-y-2">
+            <p className="text-[10px] uppercase tracking-[0.5em] font-black text-slate-300">Node Grid Standby</p>
+            <p className="text-[9px] uppercase tracking-[0.2em] font-bold text-slate-400 opacity-50">Secure Virtual Browser Node v4.0</p>
+          </div>
         </div>
-        <p className="text-[10px] uppercase tracking-[0.5em] font-black text-slate-300">Node Grid Standby...</p>
       </div>
-    </div>
-  );
+    );
+  }
 
   const targetSrc = activeUrl.includes('.') && !activeUrl.includes(' ')
     ? (activeUrl.startsWith('http') ? activeUrl : `https://${activeUrl}`)

@@ -57,7 +57,7 @@ export function Dashboard() {
             </div>
           </div>
           <h2 className="text-7xl font-headline font-black tracking-tighter text-slate-900">
-            Welcome to <span className="neon-cyan-glow">RizaBrowser</span>
+            Welcome to <span className="text-primary neon-cyan-glow">RizaBrowser</span>
           </h2>
           <p className="text-slate-500 font-medium max-w-2xl text-lg">
             A premium high-density browsing node with integrated decentralized banking and native shell execution.

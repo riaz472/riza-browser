@@ -10,7 +10,8 @@ import { WebRenderer } from './WebRenderer';
 import { TermuxTerminal } from './TermuxTerminal';
 import { SettingsPanel } from './SettingsPanel';
 import { WalletView } from './WalletView';
-import { cn } from '@/lib/utils';
+import { ExtensionStore } from './ExtensionStore';
+import { SourceCodeAnalyzer } from './SourceCodeAnalyzer';
 
 export function BrowserContainer() {
   const { currentView, wallpaper } = useBrowser();
@@ -22,6 +23,8 @@ export function BrowserContainer() {
       case 'terminal': return <TermuxTerminal />;
       case 'settings': return <SettingsPanel />;
       case 'wallet': return <WalletView />;
+      case 'extensions': return <ExtensionStore />;
+      case 'analyzer': return <SourceCodeAnalyzer />;
       default: return <Dashboard />;
     }
   };
