@@ -1,0 +1,34 @@
+{
+  "placeholderImages": [
+    {
+      "id": "riza-logo",
+      "description": "RizaBrowser Futuristic R Logo",
+      "imageUrl": "https://picsum.photos/seed/riza-logo/200/200",
+      "imageHint": "futuristic logo R"
+    },
+    {
+      "id": "google-logo",
+      "description": "Google Logo",
+      "imageUrl": "https://picsum.photos/seed/google/100/100",
+      "imageHint": "google logo"
+    },
+    {
+      "id": "youtube-logo",
+      "description": "YouTube Logo",
+      "imageUrl": "https://picsum.photos/seed/youtube/100/100",
+      "imageHint": "youtube logo"
+    },
+    {
+      "id": "tiktok-logo",
+      "description": "TikTok Logo",
+      "imageUrl": "https://picsum.photos/seed/tiktok/100/100",
+      "imageHint": "tiktok logo"
+    },
+    {
+      "id": "discord-logo",
+      "description": "Discord Logo",
+      "imageUrl": "https://picsum.photos/seed/discord/100/100",
+      "imageHint": "discord logo"
+    }
+  ]
+}
