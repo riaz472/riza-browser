@@ -1,160 +1,79 @@
 
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useBrowser } from '@/context/BrowserContext';
-import { Settings, Shield, User, Globe, Activity, Zap, Layers, Fingerprint } from 'lucide-react';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { cn } from '@/lib/utils';
+
+const SettingsIcon = ({ d, color = "currentColor", size = 20 }: { d: string, color?: string, size?: number }) => (
+  <svg viewBox="0 0 24 24" width={size} height={size} fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d={d} />
+  </svg>
+);
 
 export function SettingsPanel() {
-  const { 
-    engineProfile, setEngineProfile, 
-    proxySpeed, setProxySpeed,
-    fingerprintProtection, setFingerprintProtection 
-  } = useBrowser();
+  const { wallpaper, setWallpaper } = useBrowser();
+  const [urlInput, setUrlInput] = useState(wallpaper.url);
 
-  const toggleFingerprint = (key: keyof typeof fingerprintProtection) => {
-    setFingerprintProtection({
-      ...fingerprintProtection,
-      [key]: !fingerprintProtection[key]
-    });
+  const applyWallpaper = (type: 'image' | 'video') => {
+    if (!urlInput) return;
+    setWallpaper({ type, url: urlInput });
   };
 
   return (
-    <div className="flex-1 p-8 lg:p-12 overflow-y-auto">
-      <div className="max-w-4xl mx-auto space-y-12">
-        <div>
-          <h2 className="text-4xl font-headline font-bold flex items-center gap-4">
-            <Settings className="w-10 h-10 text-cyber-blue" />
-            Control Center
+    <div className="flex-1 p-12 overflow-y-auto custom-scrollbar">
+      <div className="max-w-4xl mx-auto space-y-16">
+        <div className="flex flex-col gap-4">
+          <h2 className="text-5xl font-headline font-black flex items-center gap-6">
+            <div className="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center text-white shadow-xl">
+              <SettingsIcon d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.72v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" size={28} />
+            </div>
+            Node Settings
           </h2>
-          <p className="text-foreground/50 mt-2 text-lg">Configure your identity engine and security matrix.</p>
+          <p className="text-slate-400 font-bold uppercase tracking-[0.3em] text-[10px]">Configure your identity engine and aesthetics.</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Identity Engine */}
-          <div className="glass-panel rounded-3xl p-8 space-y-8">
-            <div className="flex items-center gap-3 text-cyber-blue mb-4">
-              <User className="w-5 h-5" />
-              <h3 className="text-sm font-bold uppercase tracking-widest">Identity Engine</h3>
-            </div>
-
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+          <div className="glass-panel p-10 rounded-[3rem] space-y-8">
+            <h3 className="text-xl font-headline font-black flex items-center gap-3">
+              <SettingsIcon d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z M4 22v-7" color="#338BFF" />
+              Wallpaper Engine
+            </h3>
             <div className="space-y-6">
               <div className="space-y-3">
-                <Label className="text-xs font-bold uppercase tracking-wider opacity-60">Engine Profile Switcher</Label>
-                <Select value={engineProfile} onValueChange={setEngineProfile}>
-                  <SelectTrigger className="w-full h-14 bg-white/5 border-white/10 rounded-2xl outline-none focus:ring-2 focus:ring-cyber-blue/20">
-                    <SelectValue placeholder="Select Profile" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-obsidian border-white/10 rounded-xl">
-                    <SelectItem value="Chrome 122 (macOS)">Chrome 122 (macOS)</SelectItem>
-                    <SelectItem value="Firefox 123 (Windows)">Firefox 123 (Windows)</SelectItem>
-                    <SelectItem value="Safari 17.4 (iOS)">Safari 17.4 (iOS)</SelectItem>
-                    <SelectItem value="Edge 121 (Linux)">Edge 121 (Linux)</SelectItem>
-                  </SelectContent>
-                </Select>
+                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Resource URL</label>
+                <input 
+                  type="text" 
+                  value={urlInput}
+                  onChange={(e) => setUrlInput(e.target.value)}
+                  placeholder="Paste image or MP4 link..."
+                  className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 px-6 text-sm outline-none focus:ring-4 focus:ring-primary/10 transition-all"
+                />
               </div>
-
-              <div className="space-y-3">
-                <Label className="text-xs font-bold uppercase tracking-wider opacity-60">Proxy Routing Speed</Label>
-                <div className="grid grid-cols-3 gap-2">
-                  {(['standard', 'hyper', 'stealth'] as const).map(s => (
-                    <button
-                      key={s}
-                      onClick={() => setProxySpeed(s)}
-                      className={cn(
-                        "py-3 rounded-xl border text-[10px] font-bold uppercase tracking-widest transition-all",
-                        proxySpeed === s 
-                          ? "bg-cyber-blue/20 border-cyber-blue text-cyber-blue" 
-                          : "bg-white/5 border-white/10 opacity-50 hover:opacity-100"
-                      )}
-                    >
-                      {s}
-                    </button>
-                  ))}
-                </div>
+              <div className="grid grid-cols-2 gap-4">
+                <button onClick={() => applyWallpaper('image')} className="py-4 rounded-2xl bg-white border border-slate-200 font-black text-[10px] uppercase tracking-widest hover:bg-slate-50 transition-all">Set Image</button>
+                <button onClick={() => applyWallpaper('video')} className="py-4 rounded-2xl bg-slate-900 text-white font-black text-[10px] uppercase tracking-widest hover:bg-slate-800 transition-all">Set Video</button>
               </div>
             </div>
           </div>
 
-          {/* Fingerprint Matrix */}
-          <div className="glass-panel rounded-3xl p-8 space-y-8">
-            <div className="flex items-center gap-3 text-cyber-purple mb-4">
-              <Fingerprint className="w-5 h-5" />
-              <h3 className="text-sm font-bold uppercase tracking-widest">Fingerprint Matrix</h3>
-            </div>
-
+          <div className="glass-panel p-10 rounded-[3rem] space-y-8">
+            <h3 className="text-xl font-headline font-black flex items-center gap-3">
+              <SettingsIcon d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" color="#A633FF" />
+              Privacy Core
+            </h3>
             <div className="space-y-6">
-              <div className="flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
-                <div className="space-y-1">
-                  <div className="text-sm font-bold">WebRTC Leak Protection</div>
-                  <div className="text-[10px] opacity-40 uppercase tracking-tighter">Blocks internal IP exposure</div>
+              {[
+                { label: 'WebRTC Leak Protection', active: true },
+                { label: 'Canvas Fingerprint Mixing', active: true },
+                { label: 'WebGL Simulation', active: true }
+              ].map((item, i) => (
+                <div key={i} className="flex items-center justify-between p-5 rounded-2xl bg-slate-50 border border-slate-100">
+                  <span className="text-sm font-bold">{item.label}</span>
+                  <div className="w-10 h-5 bg-primary rounded-full p-1 flex justify-end">
+                    <div className="w-3 h-3 bg-white rounded-full" />
+                  </div>
                 </div>
-                <Switch 
-                  checked={fingerprintProtection.webRTC} 
-                  onCheckedChange={() => toggleFingerprint('webRTC')}
-                  className="data-[state=checked]:bg-cyber-blue"
-                />
-              </div>
-
-              <div className="flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
-                <div className="space-y-1">
-                  <div className="text-sm font-bold">Canvas Mixer</div>
-                  <div className="text-[10px] opacity-40 uppercase tracking-tighter">Randomize drawing seed</div>
-                </div>
-                <Switch 
-                  checked={fingerprintProtection.canvasMixing} 
-                  onCheckedChange={() => toggleFingerprint('canvasMixing')}
-                  className="data-[state=checked]:bg-cyber-blue"
-                />
-              </div>
-
-              <div className="space-y-3">
-                <Label className="text-xs font-bold uppercase tracking-wider opacity-60">Geolocation Spoofing</Label>
-                <Select value={fingerprintProtection.geoSpoofing} onValueChange={(v) => setFingerprintProtection({...fingerprintProtection, geoSpoofing: v})}>
-                  <SelectTrigger className="w-full h-14 bg-white/5 border-white/10 rounded-2xl outline-none focus:ring-2 focus:ring-cyber-blue/20">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-obsidian border-white/10 rounded-xl">
-                    <SelectItem value="London, UK">London, UK (51.5074° N)</SelectItem>
-                    <SelectItem value="New York, USA">New York, USA (40.7128° N)</SelectItem>
-                    <SelectItem value="Berlin, Germany">Berlin, Germany (52.5200° N)</SelectItem>
-                    <SelectItem value="Tokyo, Japan">Tokyo, Japan (35.6764° N)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* System Summary */}
-        <div className="glass-panel rounded-3xl p-8 bg-gradient-to-r from-cyber-blue/5 to-cyber-purple/5 border border-white/10">
-          <div className="flex items-center gap-6">
-            <div className="w-20 h-20 rounded-full border-4 border-cyber-blue/20 flex items-center justify-center p-2">
-              <div className="w-full h-full rounded-full bg-cyber-blue flex items-center justify-center shadow-[0_0_30px_rgba(51,139,255,0.4)]">
-                <Activity className="text-white w-8 h-8" />
-              </div>
-            </div>
-            <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="space-y-1">
-                <div className="text-[10px] font-bold uppercase opacity-40">Privacy Score</div>
-                <div className="text-xl font-bold">Excellent</div>
-              </div>
-              <div className="space-y-1">
-                <div className="text-[10px] font-bold uppercase opacity-40">Encryption</div>
-                <div className="text-xl font-bold">AES-256-GCM</div>
-              </div>
-              <div className="space-y-1">
-                <div className="text-[10px] font-bold uppercase opacity-40">Engine Integrity</div>
-                <div className="text-xl font-bold text-green-500">Verified</div>
-              </div>
-              <div className="space-y-1">
-                <div className="text-[10px] font-bold uppercase opacity-40">Last Scan</div>
-                <div className="text-xl font-bold">Just Now</div>
-              </div>
+              ))}
             </div>
           </div>
         </div>

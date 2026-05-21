@@ -1,14 +1,7 @@
+
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { 
-  Search, Shield, Ghost, Lock, RefreshCcw, 
-  MoreVertical, ArrowLeft, ArrowRight, Globe,
-  Plus, ShieldAlert, History, Bookmark, 
-  Settings, HelpCircle, Download, Share2, 
-  Maximize, Languages, Smartphone, Trash2,
-  Terminal, Wallet, Layers, Palette, ZoomIn
-} from 'lucide-react';
 import { useBrowser } from '@/context/BrowserContext';
 import { cn } from '@/lib/utils';
 import {
@@ -17,142 +10,128 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-  DropdownMenuSub,
-  DropdownMenuSubTrigger,
-  DropdownMenuSubContent,
 } from "@/components/ui/dropdown-menu";
 import { Slider } from "@/components/ui/slider";
 
+const TopIcon = ({ d, color = "currentColor", size = 20 }: { d: string, color?: string, size?: number }) => (
+  <svg viewBox="0 0 24 24" width={size} height={size} fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d={d} />
+  </svg>
+);
+
 export function TopBar() {
   const { 
-    isStealthMode, toggleStealthMode, activeUrl, navigate, 
-    setView, currentView, zoom, setZoom, isDesktopMode, setDesktopMode,
-    setWallpaper
+    navigate, activeUrl, setView, currentView, 
+    zoom, setZoom, isDesktopMode, setDesktopMode,
+    isStealthMode, toggleStealthMode
   } = useBrowser();
   const [inputValue, setInputValue] = useState('');
+  const [showSearch, setShowSearch] = useState(false);
+  const [searchText, setSearchText] = useState('');
 
   useEffect(() => {
-    if (activeUrl) {
-      setInputValue(activeUrl);
-    } else if (currentView === 'home') {
-      setInputValue('rizabrowser://home');
-    }
+    setInputValue(activeUrl || (currentView === 'home' ? 'rizabrowser://home' : ''));
   }, [activeUrl, currentView]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') navigate(inputValue);
   };
 
-  const handleWallpaperChange = () => {
-    const url = prompt("Enter Image or Video URL:");
-    if (url) {
-      const type = (url.endsWith('.mp4') || url.endsWith('.webm')) ? 'video' : 'image';
-      setWallpaper({ type, url });
+  const handleClearData = () => {
+    if (confirm("Purge browser session and local node cache?")) {
+      window.location.reload();
     }
   };
 
   return (
-    <div className="h-20 flex items-center px-6 gap-6 glass-panel border-b border-slate-200/50 z-50 shrink-0 bg-white/90">
-      <div className="flex items-center gap-1">
-        <button onClick={() => setView('home')} className="p-2.5 hover:bg-slate-100 rounded-xl transition-all text-slate-400 hover:text-slate-900">
-          <ArrowLeft className="w-5 h-5" />
+    <div className="h-20 flex items-center px-8 gap-8 glass-panel border-b border-slate-200/50 z-50 shrink-0 bg-white/95">
+      <div className="flex items-center gap-2">
+        <button onClick={() => setView('home')} className="p-3 hover:bg-slate-100 rounded-2xl transition-all text-slate-400 hover:text-slate-900 group">
+          <TopIcon d="M19 12H5 M12 19l-7-7 7-7" />
         </button>
-        <button className="p-2.5 hover:bg-slate-100 rounded-xl transition-all opacity-30 cursor-not-allowed">
-          <ArrowRight className="w-5 h-5" />
+        <button className="p-3 hover:bg-slate-100 rounded-2xl transition-all text-slate-200 cursor-not-allowed">
+          <TopIcon d="M5 12h14 M12 5l7 7-7 7" />
         </button>
-        <button 
-          onClick={() => navigate(activeUrl)} 
-          className="p-2.5 hover:bg-slate-100 rounded-xl transition-all text-slate-400 hover:text-slate-900"
-        >
-          <RefreshCcw className="w-5 h-5" />
+        <button onClick={() => navigate(activeUrl)} className="p-3 hover:bg-slate-100 rounded-2xl transition-all text-slate-400 hover:text-slate-900">
+          <TopIcon d="M23 4v6h-6 M20.49 15a9 9 0 11-2.12-9.36L23 10" />
         </button>
       </div>
 
-      <div className="flex-1 max-w-3xl mx-auto relative">
-        <div className="relative flex items-center bg-slate-100/50 border border-slate-200 rounded-2xl px-5 h-12 focus-within:border-primary focus-within:ring-4 focus-within:ring-primary/10 transition-all group">
-          <div className="mr-3 flex items-center">
-            {activeUrl?.startsWith('https') ? (
-              <Lock className="w-4 h-4 text-green-500" />
-            ) : (
-              <Globe className="w-4 h-4 text-primary opacity-50" />
-            )}
+      <div className="flex-1 max-w-4xl mx-auto relative group">
+        <div className="relative flex items-center bg-slate-100/60 border border-slate-200 rounded-[1.5rem] px-6 h-12 focus-within:border-primary focus-within:ring-4 focus-within:ring-primary/10 transition-all">
+          <div className="mr-4 flex items-center opacity-40">
+            {activeUrl?.startsWith('https') ? <TopIcon d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" size={14} color="#22c55e" /> : <TopIcon d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" size={14} />}
           </div>
           <input
             type="text"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Explore the grid or enter a node address..."
             className="flex-1 bg-transparent outline-none text-sm font-bold text-slate-700 tracking-tight"
+            placeholder="Search grid or enter address..."
             onFocus={() => inputValue === 'rizabrowser://home' && setInputValue('')}
           />
-          <Search className="w-4 h-4 opacity-30 group-hover:opacity-100 transition-opacity" />
+          <TopIcon d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" size={16} />
         </div>
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-4">
         <button
           onClick={toggleStealthMode}
           className={cn(
-            "flex items-center gap-2 px-5 py-2.5 rounded-xl border transition-all duration-500",
-            isStealthMode 
-              ? "bg-red-500 border-red-600 text-white shadow-lg shadow-red-500/30"
-              : "bg-white border-slate-200 hover:border-slate-400"
+            "flex items-center gap-3 px-6 py-2.5 rounded-2xl border transition-all duration-700 font-black text-[10px] uppercase tracking-[0.2em]",
+            isStealthMode ? "bg-red-500 border-red-600 text-white shadow-xl shadow-red-500/30" : "bg-white border-slate-200 hover:border-slate-400 text-slate-600"
           )}
         >
-          <Ghost className={cn("w-4 h-4", isStealthMode && "animate-pulse")} />
-          <span className="text-[10px] font-black uppercase tracking-widest">
-            {isStealthMode ? 'Ghost Enabled' : 'Go Stealth'}
-          </span>
+          <div className={cn("w-2 h-2 rounded-full", isStealthMode ? "bg-white animate-pulse" : "bg-slate-300")} />
+          {isStealthMode ? 'Ghost Active' : 'Go Stealth'}
         </button>
 
-        <div className="w-px h-8 bg-slate-200 mx-1" />
+        <div className="w-px h-8 bg-slate-200 mx-2" />
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="p-2.5 hover:bg-slate-100 rounded-xl transition-all text-slate-600">
-              <MoreVertical className="w-6 h-6" />
+            <button className="p-3 hover:bg-slate-100 rounded-2xl transition-all text-slate-600">
+              <TopIcon d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0 M12 19m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0 M12 5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-72 rounded-[2rem] p-3 glass-panel border-slate-200">
-            <div className="grid grid-cols-4 gap-2 mb-4">
+          <DropdownMenuContent align="end" className="w-80 rounded-[2.5rem] p-6 glass-panel border-slate-200 shadow-2xl max-h-[80vh] overflow-y-auto custom-scrollbar">
+            <div className="grid grid-cols-4 gap-3 mb-6">
               {[
-                { icon: Plus, label: 'New', action: () => navigate('https://google.com') },
-                { icon: ShieldAlert, label: 'Incog', action: () => toggleStealthMode() },
-                { icon: Terminal, label: 'Shell', action: () => setView('terminal') },
-                { icon: Wallet, label: 'Pay', action: () => setView('wallet') },
+                { label: 'New', d: "M12 5v14M5 12h14", color: "text-primary", action: () => navigate('https://google.com') },
+                { label: 'Incog', d: "M17 11V7a5 5 0 0 0-10 0v4 M12 11v4", color: "text-slate-900", action: () => toggleStealthMode() },
+                { label: 'Shell', d: "M4 17l6-6-6-6 M12 19h8", color: "text-accent", action: () => setView('terminal') },
+                { label: 'Vault', d: "M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4M4 6v12c0 1.1.9 2 2 2h14v-4M16 12h4", color: "text-green-500", action: () => setView('wallet') },
               ].map((btn, i) => (
-                <button key={i} onClick={btn.action} className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-slate-50 hover:bg-primary/10 transition-colors group">
-                  <btn.icon className="w-5 h-5 text-slate-500 group-hover:text-primary" />
-                  <span className="text-[9px] font-black uppercase tracking-widest opacity-40">{btn.label}</span>
+                <button key={i} onClick={btn.action} className="flex flex-col items-center gap-2 p-4 rounded-3xl bg-slate-50 hover:bg-white border border-slate-100 transition-all hover:scale-105 active:scale-95 group shadow-sm">
+                  <div className={btn.color}><TopIcon d={btn.d} size={20} /></div>
+                  <span className="text-[9px] font-black uppercase tracking-widest opacity-40 group-hover:opacity-100">{btn.label}</span>
                 </button>
               ))}
             </div>
 
-            <DropdownMenuSeparator />
+            <DropdownMenuSeparator className="my-4 bg-slate-100" />
             
-            <DropdownMenuItem onClick={() => setView('terminal')} className="rounded-xl py-3 cursor-pointer">
-              <Terminal className="w-4 h-4 mr-3 text-primary" />
-              <span className="font-bold text-sm">Launch Termux Shell</span>
+            <DropdownMenuItem onClick={() => setView('terminal')} className="rounded-2xl py-4 px-4 cursor-pointer focus:bg-slate-50 transition-colors">
+              <div className="flex items-center gap-4">
+                <TopIcon d="M4 17l6-6-6-6 M12 19h8" size={16} color="#338BFF" />
+                <span className="font-bold text-sm">Bash Terminal</span>
+              </div>
             </DropdownMenuItem>
 
-            <DropdownMenuSub>
-              <DropdownMenuSubTrigger className="rounded-xl py-3">
-                <Palette className="w-4 h-4 mr-3 text-accent" />
-                <span className="font-bold text-sm">Theme & Wallpaper</span>
-              </DropdownMenuSubTrigger>
-              <DropdownMenuSubContent className="glass-panel rounded-2xl p-2 min-w-[200px]">
-                <DropdownMenuItem onClick={handleWallpaperChange} className="rounded-xl">Custom Background</DropdownMenuItem>
-                <DropdownMenuItem className="rounded-xl">Light/Dark Sync</DropdownMenuItem>
-              </DropdownMenuSubContent>
-            </DropdownMenuSub>
+            <DropdownMenuItem className="rounded-2xl py-4 px-4 cursor-pointer focus:bg-slate-50">
+              <div className="flex items-center gap-4">
+                <TopIcon d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" size={16} />
+                <span className="font-bold text-sm">Bookmarks</span>
+              </div>
+            </DropdownMenuItem>
 
-            <DropdownMenuSeparator />
+            <DropdownMenuSeparator className="my-4 bg-slate-100" />
 
-            <div className="px-4 py-4 space-y-4">
+            <div className="px-4 py-4 space-y-6">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <ZoomIn className="w-4 h-4 text-slate-400" />
+                <div className="flex items-center gap-4">
+                  <TopIcon d="M15 3h6v6 M9 21H3v-6 M21 3l-7 7 M3 21l7-7" size={16} />
                   <span className="text-sm font-bold">Zoom Scale</span>
                 </div>
                 <span className="text-xs font-black text-primary">{zoom}%</span>
@@ -165,33 +144,45 @@ export function TopBar() {
               />
             </div>
 
-            <DropdownMenuSeparator />
+            <DropdownMenuSeparator className="my-4 bg-slate-100" />
 
-            <DropdownMenuItem className="rounded-xl py-3 cursor-pointer">
-              <History className="w-4 h-4 mr-3 text-slate-400" />
-              <span className="font-bold text-sm">History Logs</span>
+            <div className="px-4 pb-2">
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center gap-4 px-1">
+                  <TopIcon d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" size={16} />
+                  <span className="text-sm font-bold">Find in Node</span>
+                </div>
+                <input 
+                  type="text" 
+                  value={searchText}
+                  onChange={(e) => setSearchText(e.target.value)}
+                  placeholder="Type to highlight..."
+                  className="w-full bg-slate-50 border border-slate-100 rounded-xl py-3 px-4 text-xs outline-none focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+            </div>
+
+            <DropdownMenuSeparator className="my-4 bg-slate-100" />
+
+            <DropdownMenuItem onClick={() => setDesktopMode(!isDesktopMode)} className="rounded-2xl py-4 px-4 cursor-pointer focus:bg-slate-50">
+              <div className="flex items-center gap-4">
+                <TopIcon d="M2 2h20v15H2V2z M2 17h20v5H2v-5z" size={16} />
+                <span className="font-bold text-sm">{isDesktopMode ? 'Mobile Agent' : 'Desktop Agent'}</span>
+              </div>
             </DropdownMenuItem>
-            
-            <DropdownMenuItem className="rounded-xl py-3 cursor-pointer">
-              <Bookmark className="w-4 h-4 mr-3 text-slate-400" />
-              <span className="font-bold text-sm">Saved Nodes</span>
+
+            <DropdownMenuItem onClick={() => setView('settings')} className="rounded-2xl py-4 px-4 cursor-pointer focus:bg-slate-50">
+              <div className="flex items-center gap-4">
+                <TopIcon d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.72v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" size={16} />
+                <span className="font-bold text-sm">Preferences</span>
+              </div>
             </DropdownMenuItem>
 
-            <DropdownMenuItem onClick={() => setDesktopMode(!isDesktopMode)} className="rounded-xl py-3 cursor-pointer">
-              <Smartphone className="w-4 h-4 mr-3 text-slate-400" />
-              <span className="font-bold text-sm">{isDesktopMode ? 'Mobile View' : 'Desktop Site'}</span>
-            </DropdownMenuItem>
-
-            <DropdownMenuSeparator />
-
-            <DropdownMenuItem onClick={() => setView('settings')} className="rounded-xl py-3 cursor-pointer">
-              <Settings className="w-4 h-4 mr-3 text-slate-400" />
-              <span className="font-bold text-sm">System Preferences</span>
-            </DropdownMenuItem>
-
-            <DropdownMenuItem className="rounded-xl py-3 cursor-pointer text-red-500 hover:bg-red-50 focus:bg-red-50">
-              <Trash2 className="w-4 h-4 mr-3" />
-              <span className="font-bold text-sm">Clear Cache Data</span>
+            <DropdownMenuItem onClick={handleClearData} className="rounded-2xl py-4 px-4 cursor-pointer focus:bg-red-50 text-red-500">
+              <div className="flex items-center gap-4">
+                <TopIcon d="M3 6h18 M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" size={16} />
+                <span className="font-bold text-sm">Purge Cache</span>
+              </div>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

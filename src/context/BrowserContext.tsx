@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
@@ -14,10 +15,6 @@ interface BrowserContextType {
   history: string[];
   blockedAds: number;
   blockedTrackers: number;
-  engineProfile: string;
-  setEngineProfile: (p: string) => void;
-  proxySpeed: 'standard' | 'hyper' | 'stealth';
-  setProxySpeed: (s: 'standard' | 'hyper' | 'stealth') => void;
   zoom: number;
   setZoom: (z: number) => void;
   isDesktopMode: boolean;
@@ -27,7 +24,8 @@ interface BrowserContextType {
   wallet: {
     balance: number;
     address: string;
-    transactions: any[];
+    isLocked: boolean;
+    setLocked: (v: boolean) => void;
   };
 }
 
@@ -40,23 +38,13 @@ export function BrowserProvider({ children }: { children: React.ReactNode }) {
   const [history, setHistory] = useState<string[]>([]);
   const [blockedAds, setBlockedAds] = useState(1204);
   const [blockedTrackers, setBlockedTrackers] = useState(842);
-  const [engineProfile, setEngineProfile] = useState('Chrome 122 (macOS)');
-  const [proxySpeed, setProxySpeed] = useState<'standard' | 'hyper' | 'stealth'>('standard');
   const [zoom, setZoom] = useState(100);
   const [isDesktopMode, setDesktopMode] = useState(false);
   const [wallpaper, setWallpaper] = useState<{ type: 'image' | 'video', url: string }>({
     type: 'image',
-    url: 'https://picsum.photos/seed/cyber/1920/1080'
+    url: 'https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=2070&auto=format&fit=crop'
   });
-
-  const [wallet] = useState({
-    balance: 420.69,
-    address: '0xRIZA...9902',
-    transactions: [
-      { id: 1, type: 'Received', amount: 50, from: 'Node-Explorer', date: '2024-05-20' },
-      { id: 2, type: 'Sent', amount: 10, to: 'Proxy-Node-Alpha', date: '2024-05-19' },
-    ]
-  });
+  const [isWalletLocked, setIsWalletLocked] = useState(true);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -69,11 +57,8 @@ export function BrowserProvider({ children }: { children: React.ReactNode }) {
   const toggleStealthMode = () => {
     setIsStealthMode(prev => {
       const next = !prev;
-      if (next) {
-        document.documentElement.classList.add('stealth-mode');
-      } else {
-        document.documentElement.classList.remove('stealth-mode');
-      }
+      if (next) document.documentElement.classList.add('stealth-mode');
+      else document.documentElement.classList.remove('stealth-mode');
       return next;
     });
   };
@@ -107,17 +92,18 @@ export function BrowserProvider({ children }: { children: React.ReactNode }) {
         history,
         blockedAds,
         blockedTrackers,
-        engineProfile,
-        setEngineProfile,
-        proxySpeed,
-        setProxySpeed,
         zoom,
         setZoom,
         isDesktopMode,
         setDesktopMode,
         wallpaper,
         setWallpaper,
-        wallet,
+        wallet: {
+          balance: 420.69,
+          address: '0xRIZA...9902',
+          isLocked: isWalletLocked,
+          setLocked: setIsWalletLocked
+        },
       }}
     >
       {children}

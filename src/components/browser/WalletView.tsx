@@ -1,157 +1,114 @@
+
 "use client";
 
 import React, { useState } from 'react';
 import { useBrowser } from '@/context/BrowserContext';
-import { 
-  Wallet, ArrowUpRight, ArrowDownLeft, ShieldCheck, 
-  RefreshCcw, Copy, Send, LayoutGrid, Lock, 
-  Fingerprint, CreditCard, PieChart
-} from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
+
+const WalletIcon = ({ d, color = "currentColor", size = 24 }: { d: string, color?: string, size?: number }) => (
+  <svg viewBox="0 0 24 24" width={size} height={size} fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d={d} />
+  </svg>
+);
 
 export function WalletView() {
   const { wallet } = useBrowser();
-  const [activeTab, setActiveTab] = useState('assets');
-  const [isLocked, setIsLocked] = useState(false);
 
-  if (isLocked) {
+  if (wallet.isLocked) {
     return (
       <div className="flex-1 flex items-center justify-center bg-white p-12">
-        <div className="glass-panel p-12 rounded-[3rem] text-center space-y-8 max-w-md w-full border-slate-200">
-          <div className="w-24 h-24 rounded-[2.5rem] bg-slate-50 border border-slate-100 flex items-center justify-center mx-auto shadow-sm">
-            <Lock className="w-10 h-10 text-primary" />
+        <div className="glass-panel p-16 rounded-[4rem] text-center space-y-10 max-w-md w-full border-slate-200 shadow-2xl">
+          <div className="w-28 h-28 rounded-[3rem] bg-slate-50 border border-slate-100 flex items-center justify-center mx-auto shadow-sm">
+            <WalletIcon d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" size={40} color="#338BFF" />
           </div>
-          <div className="space-y-2">
-            <h2 className="text-3xl font-headline font-bold">Wallet Encrypted</h2>
-            <p className="text-slate-400 text-sm font-medium">Authentication required to access node assets.</p>
+          <div className="space-y-3">
+            <h2 className="text-4xl font-headline font-black">Vault Encrypted</h2>
+            <p className="text-slate-400 text-sm font-bold uppercase tracking-widest">Biometric signature required.</p>
           </div>
-          <Button 
-            onClick={() => setIsLocked(false)}
-            className="w-full h-16 rounded-3xl bg-slate-900 text-white font-bold text-lg hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-slate-200"
+          <button 
+            onClick={() => wallet.setLocked(false)}
+            className="w-full py-6 rounded-[2rem] bg-slate-900 text-white font-black text-xs uppercase tracking-[0.3em] hover:scale-[1.02] active:scale-95 transition-all shadow-2xl shadow-slate-300"
           >
-            <Fingerprint className="w-6 h-6 mr-2" />
-            Scan Biometric
-          </Button>
+            Authenticate Node
+          </button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex-1 overflow-y-auto p-12 custom-scrollbar">
+    <div className="flex-1 overflow-y-auto p-12 custom-scrollbar bg-slate-50/50 h-full">
       <div className="max-w-6xl mx-auto space-y-12">
         <div className="flex items-center justify-between">
-           <div className="space-y-1">
-             <h2 className="text-4xl font-headline font-bold flex items-center gap-4">
-               <Wallet className="w-10 h-10 text-primary" />
-               RizaWallet <span className="text-slate-300 font-light">Node-4</span>
+           <div className="space-y-2">
+             <h2 className="text-4xl font-headline font-black flex items-center gap-5">
+               <div className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center text-white shadow-xl">
+                 <WalletIcon d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4M4 6v12c0 1.1.9 2 2 2h14v-4M16 12h4" size={24} />
+               </div>
+               RizaWallet <span className="text-slate-300 font-light tracking-tighter">Node-RX4</span>
              </h2>
-             <p className="text-slate-400 font-bold uppercase tracking-[0.2em] text-[10px]">Premium Decentralized Node Banking</p>
+             <p className="text-slate-400 font-black uppercase tracking-[0.3em] text-[10px]">Premium Decentralized Node Banking</p>
            </div>
-           <div className="flex gap-3">
-             <Button onClick={() => setIsLocked(true)} variant="outline" className="rounded-2xl border-slate-200 font-bold">
-               <Lock className="w-4 h-4 mr-2" />
-               Lock Vault
-             </Button>
-             <Button className="rounded-2xl bg-primary hover:bg-primary/90 text-white font-bold px-8">
-               <RefreshCcw className="w-4 h-4 mr-2" />
-               Sync Node
-             </Button>
-           </div>
+           <button onClick={() => wallet.setLocked(true)} className="px-8 py-3 rounded-2xl border border-slate-200 font-black text-[10px] uppercase tracking-widest hover:bg-white transition-all">
+             Lock Vault
+           </button>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Card */}
-          <div className="lg:col-span-2 space-y-8">
-            <div className="glass-panel p-12 rounded-[3rem] relative overflow-hidden bg-gradient-to-br from-white to-slate-50/50">
-               <div className="absolute top-0 right-0 p-12 opacity-5">
-                 <ShieldCheck className="w-48 h-48" />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+          <div className="lg:col-span-2 space-y-10">
+            <div className="glass-panel p-16 rounded-[4rem] relative overflow-hidden bg-white border-white/60 shadow-2xl">
+               <div className="absolute top-0 right-0 p-16 opacity-5">
+                 <WalletIcon d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" size={200} />
                </div>
-               <div className="relative z-10 space-y-12">
+               <div className="relative z-10 space-y-16">
                   <div className="flex items-start justify-between">
                     <div>
-                      <div className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mb-2">Current Node Balance</div>
-                      <div className="text-6xl font-headline font-black text-slate-900">${wallet.balance}</div>
-                      <div className="flex items-center gap-2 mt-4">
-                         <div className="bg-primary/10 text-primary px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">
+                      <div className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400 mb-4">Total Balance</div>
+                      <div className="text-7xl font-headline font-black text-slate-900 tracking-tighter">${wallet.balance}</div>
+                      <div className="flex items-center gap-3 mt-6">
+                         <div className="bg-primary/10 text-primary px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em]">
                            + 12.5% THIS WEEK
                          </div>
                       </div>
                     </div>
                     <div className="text-right">
-                       <div className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mb-2">Vault Address</div>
-                       <div className="flex items-center gap-3 bg-white border border-slate-100 px-4 py-2 rounded-2xl shadow-sm">
+                       <div className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400 mb-4">Vault Address</div>
+                       <div className="flex items-center gap-4 bg-slate-50 border border-slate-100 px-6 py-3 rounded-2xl">
                          <span className="font-code font-bold text-sm text-slate-700">{wallet.address}</span>
-                         <Copy className="w-4 h-4 text-slate-300 hover:text-primary cursor-pointer transition-colors" />
+                         <WalletIcon d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2 M12 11h4 M12 16h4 M8 11h.01 M8 16h.01" size={16} />
                        </div>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-4 gap-4 pt-8">
-                    {[
-                      { icon: Send, label: 'Send' },
-                      { icon: RefreshCcw, label: 'Swap' },
-                      { icon: CreditCard, label: 'Buy' },
-                      { icon: LayoutGrid, label: 'Bridge' }
-                    ].map((btn, i) => (
-                      <button key={i} className="flex flex-col items-center gap-3 p-6 rounded-[2rem] bg-slate-50 hover:bg-primary hover:text-white transition-all group border border-slate-100 shadow-sm">
-                        <btn.icon className="w-6 h-6 text-primary group-hover:text-white" />
-                        <span className="text-[10px] font-black uppercase tracking-widest">{btn.label}</span>
+                  <div className="grid grid-cols-4 gap-6 pt-10">
+                    {['Send', 'Swap', 'Buy', 'Bridge'].map((label, i) => (
+                      <button key={i} className="flex flex-col items-center gap-4 p-8 rounded-[3rem] bg-slate-50 hover:bg-primary hover:text-white transition-all group border border-slate-100 shadow-sm hover:shadow-2xl hover:-translate-y-1">
+                        <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center transition-all group-hover:scale-110">
+                           <WalletIcon d="M22 2L11 13 M22 2l-7 20-4-9-9-4 20-7z" size={20} color="inherit" />
+                        </div>
+                        <span className="text-[10px] font-black uppercase tracking-[0.3em]">{label}</span>
                       </button>
                     ))}
                   </div>
                </div>
             </div>
-
-            <div className="glass-panel p-10 rounded-[2.5rem] space-y-8">
-              <h3 className="text-xl font-headline font-bold flex items-center justify-between">
-                Recent Transactions
-                <span className="text-xs font-bold text-primary cursor-pointer hover:underline">View All</span>
-              </h3>
-              <div className="space-y-4">
-                {wallet.transactions.map((tx) => (
-                  <div key={tx.id} className="flex items-center justify-between p-6 rounded-3xl bg-slate-50 border border-slate-100 hover:bg-white transition-all group">
-                    <div className="flex items-center gap-4">
-                      <div className={cn(
-                        "w-12 h-12 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110",
-                        tx.type === 'Received' ? "bg-green-100 text-green-600" : "bg-red-100 text-red-600"
-                      )}>
-                        {tx.type === 'Received' ? <ArrowDownLeft className="w-6 h-6" /> : <ArrowUpRight className="w-6 h-6" />}
-                      </div>
-                      <div>
-                        <div className="font-bold text-slate-900">{tx.type} {tx.type === 'Received' ? 'from' : 'to'} {tx.from || tx.to}</div>
-                        <div className="text-xs font-bold text-slate-400">{tx.date}</div>
-                      </div>
-                    </div>
-                    <div className={cn("font-headline font-black text-xl", tx.type === 'Received' ? "text-green-600" : "text-slate-900")}>
-                      {tx.type === 'Received' ? '+' : '-'}${tx.amount}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
           </div>
 
-          {/* Sidebar Stats */}
-          <div className="space-y-8">
-            <div className="glass-panel p-10 rounded-[2.5rem] space-y-8">
-              <div className="flex items-center justify-between">
-                 <h3 className="text-lg font-headline font-bold">Asset Allocation</h3>
-                 <PieChart className="w-5 h-5 text-slate-400" />
-              </div>
-              <div className="space-y-6">
+          <div className="space-y-10">
+            <div className="glass-panel p-12 rounded-[3.5rem] space-y-10 border-white/60">
+              <h3 className="text-xl font-headline font-black">Asset Status</h3>
+              <div className="space-y-8">
                 {[
                   { label: 'RIZA Tokens', value: 65, color: 'bg-primary' },
                   { label: 'Ether Node', value: 20, color: 'bg-accent' },
                   { label: 'Stable Credits', value: 15, color: 'bg-slate-900' }
                 ].map((asset, i) => (
-                  <div key={i} className="space-y-2">
-                    <div className="flex justify-between text-xs font-bold">
-                      <span className="text-slate-500">{asset.label}</span>
+                  <div key={i} className="space-y-3">
+                    <div className="flex justify-between text-[10px] font-black uppercase tracking-widest">
+                      <span className="text-slate-400">{asset.label}</span>
                       <span className="text-slate-900">{asset.value}%</span>
                     </div>
-                    <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                    <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
                       <div className={cn("h-full transition-all duration-1000", asset.color)} style={{ width: `${asset.value}%` }} />
                     </div>
                   </div>
@@ -159,25 +116,25 @@ export function WalletView() {
               </div>
             </div>
 
-            <div className="glass-panel p-10 rounded-[2.5rem] bg-slate-900 text-white space-y-6">
-               <h3 className="text-lg font-headline font-bold">Node Security</h3>
-               <div className="p-6 rounded-3xl bg-white/10 border border-white/10 space-y-4">
+            <div className="glass-panel p-12 rounded-[3.5rem] bg-slate-900 text-white space-y-8">
+               <h3 className="text-xl font-headline font-black neon-cyan-glow">Node Security</h3>
+               <div className="p-6 rounded-[2rem] bg-white/10 border border-white/10 space-y-4">
                   <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-green-500/20 flex items-center justify-center text-green-400">
-                      <ShieldCheck className="w-6 h-6" />
+                    <div className="w-12 h-12 rounded-2xl bg-green-500/20 flex items-center justify-center text-green-400">
+                      <WalletIcon d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" size={24} />
                     </div>
                     <div>
-                      <div className="text-sm font-bold">Encryption Active</div>
-                      <div className="text-[10px] font-bold text-white/50 uppercase tracking-widest">TLS 1.3 Certified</div>
+                      <div className="text-xs font-black uppercase tracking-widest">Encryption Active</div>
+                      <div className="text-[9px] font-bold text-white/50 uppercase tracking-[0.2em]">TLS 1.3 Certified</div>
                     </div>
                   </div>
                </div>
-               <p className="text-xs font-medium text-white/40 leading-relaxed">
-                 Your assets are binding to Node-ID RX-9902-B. Ensure your recovery phrase is secured offline.
+               <p className="text-[10px] font-medium text-white/40 leading-relaxed uppercase tracking-widest">
+                 Your assets are binding to Node-ID RX-9902-B. 
                </p>
-               <Button className="w-full h-12 rounded-2xl bg-white text-slate-900 font-bold hover:bg-slate-100">
+               <button className="w-full py-5 rounded-2xl bg-white text-slate-900 font-black text-[10px] uppercase tracking-[0.2em] hover:bg-slate-100 transition-all">
                  Backup Vault
-               </Button>
+               </button>
             </div>
           </div>
         </div>
