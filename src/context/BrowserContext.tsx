@@ -3,7 +3,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-export type BrowserView = 'home' | 'browser' | 'analyzer' | 'terminal' | 'settings' | 'extensions' | 'wallet';
+export type BrowserView = 'home' | 'browser' | 'terminal' | 'wallet';
 
 interface BrowserContextType {
   isStealthMode: boolean;
@@ -12,7 +12,6 @@ interface BrowserContextType {
   setView: (view: BrowserView) => void;
   activeUrl: string;
   navigate: (url: string) => void;
-  history: string[];
   blockedAds: number;
   blockedTrackers: number;
   zoom: number;
@@ -35,7 +34,6 @@ export function BrowserProvider({ children }: { children: React.ReactNode }) {
   const [isStealthMode, setIsStealthMode] = useState(false);
   const [currentView, setCurrentView] = useState<BrowserView>('home');
   const [activeUrl, setActiveUrl] = useState('');
-  const [history, setHistory] = useState<string[]>([]);
   const [blockedAds, setBlockedAds] = useState(1204);
   const [blockedTrackers, setBlockedTrackers] = useState(842);
   const [zoom, setZoom] = useState(100);
@@ -71,7 +69,6 @@ export function BrowserProvider({ children }: { children: React.ReactNode }) {
       return;
     }
     setActiveUrl(target);
-    setHistory(prev => [target, ...prev].slice(0, 50));
     setCurrentView('browser');
   };
 
@@ -89,7 +86,6 @@ export function BrowserProvider({ children }: { children: React.ReactNode }) {
         setView,
         activeUrl,
         navigate,
-        history,
         blockedAds,
         blockedTrackers,
         zoom,
@@ -100,7 +96,7 @@ export function BrowserProvider({ children }: { children: React.ReactNode }) {
         setWallpaper,
         wallet: {
           balance: 420.69,
-          address: '0xRIZA...9902',
+          address: '0xRIZA...9902-B',
           isLocked: isWalletLocked,
           setLocked: setIsWalletLocked
         },

@@ -1,4 +1,6 @@
 
+"use client";
+
 import { BrowserProvider } from '@/context/BrowserContext';
 import { BrowserContainer } from '@/components/browser/BrowserContainer';
 
