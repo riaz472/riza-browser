@@ -7,7 +7,7 @@ import {
   Plus, ShieldAlert, History, Bookmark, 
   Settings, HelpCircle, Download, Share2, 
   Maximize, Languages, Smartphone, Trash2,
-  Terminal, Wallet, Layers, Palette, ZoomIn, SearchCode
+  Terminal, Wallet, Layers, Palette, ZoomIn
 } from 'lucide-react';
 import { useBrowser } from '@/context/BrowserContext';
 import { cn } from '@/lib/utils';

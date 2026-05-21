@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useBrowser } from '@/context/BrowserContext';
 import { Globe, Loader2, Smartphone, Monitor } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export function WebRenderer() {
   const { activeUrl, isStealthMode, zoom, isDesktopMode } = useBrowser();
@@ -39,7 +40,11 @@ export function WebRenderer() {
 
       <div 
         className="flex-1 w-full h-full origin-top transition-transform duration-300 ease-out"
-        style={{ transform: `scale(${zoom / 100})`, width: `${(100 / zoom) * 100}%`, height: `${(100 / zoom) * 100}%` }}
+        style={{ 
+          transform: `scale(${zoom / 100})`, 
+          width: `${(100 / zoom) * 100}%`, 
+          height: `${(100 / zoom) * 100}%` 
+        }}
       >
         <iframe
           src={targetSrc}
@@ -70,8 +75,4 @@ export function WebRenderer() {
       </div>
     </div>
   );
-}
-
-function cn(...inputs: any[]) {
-  return inputs.filter(Boolean).join(' ');
 }
